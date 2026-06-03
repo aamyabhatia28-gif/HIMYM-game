@@ -154,6 +154,10 @@ let duckPressed = false;
 // Double-jump tracking
 let jumpsUsed = 0;
 let lastSpaceTime = 0;
+// Player projectiles (thrown horns)
+let playerProjectiles = [];
+let throwCooldown = 0;
+const THROW_COOLDOWN_MS = 600;
 
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
@@ -169,6 +173,7 @@ window.addEventListener('keydown', e => {
     }
   }
   if (e.code === 'ArrowDown') duckPressed = true;
+  if ((e.code === 'KeyF' || e.code === 'ArrowRight') && (state === STATES.BOSS)) throwHorn();
   if (e.code === 'Space' && state === STATES.START) startGame();
   if (e.code === 'Space' && state === STATES.GAME_OVER) startGame();
   if (e.code === 'Space' && state === STATES.ENDING && endingTimer >= 300) startGame();
@@ -186,10 +191,17 @@ canvas.addEventListener('touchstart', e => {
   if (state === STATES.START) { startGame(); e.preventDefault(); return; }
   if (state === STATES.GAME_OVER) { startGame(); e.preventDefault(); return; }
   if (state === STATES.PLAYING || state === STATES.BOSS) {
-    const now = performance.now();
-    const isDouble = (now - lastTapTime) < 300 && jumpsUsed === 1;
-    lastTapTime = now;
-    handleJump(isDouble);
+    const rect = canvas.getBoundingClientRect();
+    const tx = (e.touches[0].clientX - rect.left) / rect.width;
+    if (state === STATES.BOSS && tx > 0.5) {
+      // Right half of screen = throw horn
+      throwHorn();
+    } else {
+      const now = performance.now();
+      const isDouble = (now - lastTapTime) < 300 && jumpsUsed === 1;
+      lastTapTime = now;
+      handleJump(isDouble);
+    }
   }
   e.preventDefault();
 }, { passive: false });
@@ -197,6 +209,23 @@ canvas.addEventListener('touchend', e => {
   player.ducking = false;
   e.preventDefault();
 }, { passive: false });
+
+function throwHorn() {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const now = performance.now();
+  if (now - throwCooldown < THROW_COOLDOWN_MS) return;
+  throwCooldown = now;
+  playerProjectiles.push({
+    x: player.x + player.w,
+    y: player.y + player.h / 2 - 10,
+    vx: 10,
+    vy: -1,
+    w: 32, h: 24
+  });
+  // Quick high-pitched toss sound
+  playSound(700, 'sine', 0.1, 0.12);
+  playSound(1000, 'sine', 0.08, 0.08);
+}
 
 function handleJump(isDouble) {
   if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -242,6 +271,8 @@ function startGame() {
   collectibles = [];
   particles = [];
   bossProjectiles = [];
+  playerProjectiles = [];
+  throwCooldown = 0;
   boss = null;
   bossPhase = false;
   invincible = false;
@@ -1597,21 +1628,27 @@ function update(dt) {
         }
       }
 
-      // Player jumping on boss
-      const bossBox = { x: boss.x + 5, y: boss.y, w: boss.w - 10, h: 15 };
-      const playerFeet = { x: player.x + 4, y: player.y + player.h - 5, w: player.w - 8, h: 10 };
-      if (player.vy > 0 && checkAABB(playerFeet, bossBox)) {
-        boss.hp--;
-        sfxBossHit();
-        player.vy = -10;
-        spawnParticles(boss.x + boss.w/2, boss.y, '#fdd835', 12);
-        boss.hitFlash = 15;
-        if (boss.hp <= 0) {
-          sfxBossDie();
-          spawnParticles(boss.x + boss.w/2, boss.y + boss.h/2, '#ffd700', 30);
-          saveProgress(score, currentLevel);
-          score += 100;
-          transitionToNextLevel();
+      // Player projectiles (thrown horns) hit boss
+      const bossHitBox = { x: boss.x, y: boss.y, w: boss.w, h: boss.h };
+      for (let i = playerProjectiles.length - 1; i >= 0; i--) {
+        const pp = playerProjectiles[i];
+        pp.x += pp.vx;
+        pp.y += pp.vy;
+        if (pp.x > 850) { playerProjectiles.splice(i, 1); continue; }
+        if (checkAABB({ x: pp.x, y: pp.y, w: pp.w, h: pp.h }, bossHitBox)) {
+          playerProjectiles.splice(i, 1);
+          boss.hp--;
+          sfxBossHit();
+          spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#1e88e5', 10);
+          boss.hitFlash = 15;
+          if (boss.hp <= 0) {
+            sfxBossDie();
+            spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#ffd700', 30);
+            saveProgress(score, currentLevel);
+            score += 100;
+            playerProjectiles = [];
+            transitionToNextLevel();
+          }
         }
       }
 
@@ -1691,8 +1728,35 @@ function draw() {
   // Boss projectiles
   bossProjectiles.forEach(proj => drawBossProjectile(proj));
 
+  // Player thrown horns
+  playerProjectiles.forEach(pp => {
+    if (hornImg.complete && hornImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(20,60,200,0.3)'; ctx.shadowBlur = 6;
+      ctx.drawImage(hornImg, pp.x, pp.y, pp.w, pp.h);
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    } else {
+      ctx.fillStyle = '#1e88e5';
+      ctx.beginPath(); ctx.arc(pp.x + 12, pp.y + 12, 10, 0, Math.PI*2); ctx.fill();
+    }
+  });
+
   // Draw player
   drawPlayer();
+
+  // Boss fight throw hint
+  if (state === STATES.BOSS && !showBossIntro) {
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.beginPath(); ctx.roundRect(10, 38, 260, 26, 6); ctx.fill();
+    ctx.fillStyle = '#fdd835';
+    ctx.font = 'bold 13px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('[ F ] or [ → ] Throw Horn!', 18, 56);
+    ctx.fillStyle = '#aaa';
+    ctx.font = '11px monospace';
+    ctx.fillText('Mobile: tap right side of screen', 18, 72);
+  }
 
   // Particles
   drawParticles();
