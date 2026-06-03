@@ -1152,7 +1152,7 @@ function spawnBoss(level) {
     x: 420, y: GROUND + 48 - def.h,
     baseY: GROUND + 48 - def.h,
     vx: -1.5, vy: 0,
-    projTimer: 0,
+    projTimer: 3000,
     bounceTimer: 0,
     hitFlash: 0,
     jumpTimer: 0
@@ -1438,7 +1438,7 @@ let showBossIntro = false;
 function triggerBoss() {
   bossPhase = true;
   showBossIntro = true;
-  bossIntroTimer = 120;
+  bossIntroTimer = 2500;
   spawnBoss(currentLevel);
   state = STATES.BOSS;
 }
@@ -1639,31 +1639,35 @@ function update(dt) {
       }
 
       // Player projectiles (thrown horns) hit boss
-      const bossHitBox = { x: boss.x, y: boss.y, w: boss.w, h: boss.h };
-      for (let i = playerProjectiles.length - 1; i >= 0; i--) {
-        const pp = playerProjectiles[i];
-        pp.vy += 0.25; // gravity arc
-        pp.x += pp.vx;
-        pp.y += pp.vy;
-        if (pp.x > 850 || pp.y > 420) { playerProjectiles.splice(i, 1); continue; }
-        if (checkAABB({ x: pp.x, y: pp.y, w: pp.w, h: pp.h }, bossHitBox)) {
-          playerProjectiles.splice(i, 1);
-          boss.hp--;
-          sfxBossHit();
-          spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#1e88e5', 10);
-          boss.hitFlash = 15;
-          if (boss.hp <= 0) {
-            sfxBossDie();
-            spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#ffd700', 30);
-            saveProgress(score, currentLevel);
-            score += 100;
-            playerProjectiles = [];
-            transitionToNextLevel();
+      if (boss) {
+        const bossHitBox = { x: boss.x, y: boss.y, w: boss.w, h: boss.h };
+        for (let i = playerProjectiles.length - 1; i >= 0; i--) {
+          if (!boss) break; // boss was killed mid-loop — stop immediately
+          const pp = playerProjectiles[i];
+          pp.vy += 0.25;
+          pp.x += pp.vx;
+          pp.y += pp.vy;
+          if (pp.x > 850 || pp.y > 420) { playerProjectiles.splice(i, 1); continue; }
+          if (checkAABB({ x: pp.x, y: pp.y, w: pp.w, h: pp.h }, bossHitBox)) {
+            playerProjectiles.splice(i, 1);
+            boss.hp--;
+            sfxBossHit();
+            spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#1e88e5', 10);
+            boss.hitFlash = 15;
+            if (boss.hp <= 0) {
+              sfxBossDie();
+              spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#ffd700', 30);
+              saveProgress(score, currentLevel);
+              score += 100;
+              playerProjectiles = [];
+              transitionToNextLevel();
+              break; // exit loop — boss is gone
+            }
           }
         }
       }
 
-      if (boss.hitFlash > 0) boss.hitFlash--;
+      if (boss && boss.hitFlash > 0) boss.hitFlash--;
     }
   }
 
