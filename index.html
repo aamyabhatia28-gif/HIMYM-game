@@ -573,108 +573,72 @@ function drawPlayer() {
 }
 
 function drawBlueHorn(x, y) {
-  const w = 52, h = 40;
-  if (hornImg.complete && hornImg.naturalWidth > 0) {
-    ctx.save();
-    ctx.shadowColor = 'rgba(20,60,200,0.28)';
-    ctx.shadowBlur = 8;
-    ctx.drawImage(hornImg, x - w / 2, y - h / 2, w, h);
-    ctx.shadowBlur = 0;
-    ctx.restore();
-    return;
-  }
-  // Fallback while image loads
   ctx.save();
   ctx.translate(x, y);
 
-  // Drop shadow for depth
-  ctx.shadowColor = 'rgba(10,60,160,0.25)';
-  ctx.shadowBlur = 6;
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 3;
-
-  // ── Coiled body — thick rounded tube ──
-  // Outer coil ring (dark blue)
-  ctx.strokeStyle = '#1255A8';
-  ctx.lineWidth = 9;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.arc(0, 0, 16, Math.PI * 0.35, Math.PI * 1.9);
-  ctx.stroke();
-
-  // Inner coil ring (lighter blue, creates tube roundness)
-  ctx.strokeStyle = '#2979FF';
-  ctx.lineWidth = 6;
-  ctx.beginPath();
-  ctx.arc(0, 0, 16, Math.PI * 0.35, Math.PI * 1.9);
-  ctx.stroke();
-
-  // Small inner loop
-  ctx.strokeStyle = '#1565C0';
-  ctx.lineWidth = 7;
-  ctx.beginPath();
-  ctx.arc(0, 2, 8, Math.PI * 0.5, Math.PI * 1.8);
-  ctx.stroke();
-  ctx.strokeStyle = '#42A5F5';
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.arc(0, 2, 8, Math.PI * 0.5, Math.PI * 1.8);
-  ctx.stroke();
-
-  ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
-
-  // ── Bell — big round flare ──
+  // ── Bell — wide teardrop flare pointing right ──
   ctx.fillStyle = '#1565C0';
   ctx.beginPath();
-  ctx.ellipse(17, 14, 14, 18, 0.4, 0, Math.PI * 2);
+  ctx.moveTo(0, 0);
+  ctx.bezierCurveTo(10, -6, 26, -10, 32, 0);
+  ctx.bezierCurveTo(38, 10, 28, 24, 14, 22);
+  ctx.bezierCurveTo(4, 20, -4, 10, 0, 0);
   ctx.fill();
+  // Bell face (lighter)
   ctx.fillStyle = '#2196F3';
   ctx.beginPath();
-  ctx.ellipse(15, 12, 11, 15, 0.4, 0, Math.PI * 2);
+  ctx.moveTo(3, 2);
+  ctx.bezierCurveTo(10, -3, 22, -6, 26, 2);
+  ctx.bezierCurveTo(30, 9, 22, 19, 13, 17);
+  ctx.bezierCurveTo(5, 15, 0, 9, 3, 2);
   ctx.fill();
-  // Bell opening — dark inside circle
-  ctx.fillStyle = '#0A2A6E';
-  ctx.beginPath();
-  ctx.ellipse(17, 14, 7, 10, 0.4, 0, Math.PI * 2);
-  ctx.fill();
-  // Bell rim highlight
-  ctx.strokeStyle = '#64B5F6';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.ellipse(17, 14, 14, 18, 0.4, 0, Math.PI * 2);
-  ctx.stroke();
+  // Bell opening (dark hole)
+  ctx.fillStyle = '#0D2B6E';
+  ctx.beginPath(); ctx.ellipse(20, 10, 7, 9, 0.2, 0, Math.PI*2); ctx.fill();
+  // Bell rim
+  ctx.strokeStyle = '#90CAF9'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.ellipse(20, 10, 7, 9, 0.2, 0, Math.PI*2); ctx.stroke();
 
-  // ── Mouthpiece — cute stubby tube ──
-  ctx.strokeStyle = '#1565C0';
-  ctx.lineWidth = 6;
+  // ── Coil — two concentric arcs, thick and rounded ──
   ctx.lineCap = 'round';
+  // Outer coil
+  ctx.strokeStyle = '#1255A8'; ctx.lineWidth = 8;
+  ctx.beginPath(); ctx.arc(-6, 4, 14, Math.PI*0.15, Math.PI*1.92); ctx.stroke();
+  ctx.strokeStyle = '#1E88E5'; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.arc(-6, 4, 14, Math.PI*0.15, Math.PI*1.92); ctx.stroke();
+  // Inner coil
+  ctx.strokeStyle = '#1565C0'; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.arc(-6, 5, 7, Math.PI*0.4, Math.PI*1.75); ctx.stroke();
+  ctx.strokeStyle = '#42A5F5'; ctx.lineWidth = 3.5;
+  ctx.beginPath(); ctx.arc(-6, 5, 7, Math.PI*0.4, Math.PI*1.75); ctx.stroke();
+
+  // ── Mouthpiece — slim curved neck + round cup ──
+  ctx.strokeStyle = '#1565C0'; ctx.lineWidth = 5;
   ctx.beginPath();
-  ctx.moveTo(-11, -13);
-  ctx.quadraticCurveTo(-18, -18, -20, -22);
+  ctx.moveTo(-8, -8);
+  ctx.quadraticCurveTo(-16, -14, -20, -20);
   ctx.stroke();
-  ctx.strokeStyle = '#64B5F6';
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#64B5F6'; ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.moveTo(-11, -13);
-  ctx.quadraticCurveTo(-18, -18, -20, -22);
+  ctx.moveTo(-8, -8);
+  ctx.quadraticCurveTo(-16, -14, -20, -20);
   ctx.stroke();
-  // Mouthpiece cup — rounded circle
+  // Cup
   ctx.fillStyle = '#1976D2';
-  ctx.beginPath(); ctx.arc(-21, -23, 5.5, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#90CAF9';
-  ctx.beginPath(); ctx.arc(-21, -23, 3.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(-21, -21, 5, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#BBDEFB';
+  ctx.beginPath(); ctx.arc(-21, -21, 3, 0, Math.PI*2); ctx.fill();
 
-  // ── Shine / gloss highlights ──
-  ctx.fillStyle = 'rgba(255,255,255,0.45)';
-  ctx.beginPath(); ctx.ellipse(-5, -8, 5, 3, -0.7, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,0.3)';
-  ctx.beginPath(); ctx.ellipse(11, 6, 4, 2.5, 0.4, 0, Math.PI * 2); ctx.fill();
+  // ── Gloss highlights ──
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.beginPath(); ctx.ellipse(-12, -2, 4, 2.5, -0.5, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.beginPath(); ctx.ellipse(10, 4, 5, 3, 0.3, 0, Math.PI*2); ctx.fill();
 
-  // ── Little sparkle star on bell ──
-  ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.font = '9px serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('✦', 20, 8);
+  // ── Sparkle ──
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.font = 'bold 10px serif'; ctx.textAlign = 'center';
+  ctx.fillText('✦', 14, -2);
 
   ctx.restore();
 }
