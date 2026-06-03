@@ -215,14 +215,14 @@ function throwHorn() {
   const now = performance.now();
   if (now - throwCooldown < THROW_COOLDOWN_MS) return;
   throwCooldown = now;
+  // Spawn well ahead of player so it doesn't instantly hit anything near them
   playerProjectiles.push({
-    x: player.x + player.w,
-    y: player.y + player.h / 2 - 10,
-    vx: 10,
-    vy: -1,
-    w: 32, h: 24
+    x: player.x + player.w + 20,
+    y: player.y - 10,
+    vx: 9,
+    vy: -3,   // arcs upward then falls, making it easier to aim
+    w: 36, h: 28
   });
-  // Quick high-pitched toss sound
   playSound(700, 'sine', 0.1, 0.12);
   playSound(1000, 'sine', 0.08, 0.08);
 }
@@ -1149,7 +1149,7 @@ function spawnBoss(level) {
   const def = types[level];
   boss = {
     ...def,
-    x: 600, y: GROUND + 48 - def.h,
+    x: 420, y: GROUND + 48 - def.h,
     baseY: GROUND + 48 - def.h,
     vx: -1.5, vy: 0,
     projTimer: 0,
@@ -1568,8 +1568,8 @@ function update(dt) {
     }
 
     if (boss && !showBossIntro) {
-      // Boss movement — range starts near player (x=60) so they can actually collide
-      const bossMinX = 60, bossMaxX = 650;
+      // Boss stays right of centre — never walks onto the player
+      const bossMinX = 250, bossMaxX = 680;
       if (boss.type === 1) {
         boss.x += boss.vx * 2;
         if (boss.x < bossMinX) boss.vx = Math.abs(boss.vx);
@@ -1588,6 +1588,27 @@ function update(dt) {
         boss.x += boss.vx * 1.5;
         if (boss.x < bossMinX) boss.vx = Math.abs(boss.vx);
         if (boss.x + boss.w > bossMaxX) boss.vx = -Math.abs(boss.vx);
+      }
+
+      // Boss body → player collision (so they can't stack/overlap)
+      const bossBodyBox = { x: boss.x, y: boss.y, w: boss.w, h: boss.h };
+      const playerBox   = { x: player.x + 4, y: player.y + 4, w: player.w - 8, h: player.h - 8 };
+      if (!invincible && checkAABB(playerBox, bossBodyBox)) {
+        score = Math.max(0, score - 15);
+        invincible = true;
+        invincibleTimer = 1500;
+        flashRed = true;
+        sfxHit();
+        lives--;
+        // Push player away from boss
+        player.vy = -8;
+        player.onGround = false;
+        if (lives <= 0) {
+          saveProgress(score, currentLevel);
+          sfxGameOver();
+          state = STATES.GAME_OVER;
+          return;
+        }
       }
 
       // Boss projectiles
@@ -1632,9 +1653,10 @@ function update(dt) {
       const bossHitBox = { x: boss.x, y: boss.y, w: boss.w, h: boss.h };
       for (let i = playerProjectiles.length - 1; i >= 0; i--) {
         const pp = playerProjectiles[i];
+        pp.vy += 0.25; // gravity arc
         pp.x += pp.vx;
         pp.y += pp.vy;
-        if (pp.x > 850) { playerProjectiles.splice(i, 1); continue; }
+        if (pp.x > 850 || pp.y > 420) { playerProjectiles.splice(i, 1); continue; }
         if (checkAABB({ x: pp.x, y: pp.y, w: pp.w, h: pp.h }, bossHitBox)) {
           playerProjectiles.splice(i, 1);
           boss.hp--;
