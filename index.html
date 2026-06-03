@@ -73,7 +73,7 @@ let currentLevel = 1;
 let invincible = false;
 let invincibleTimer = 0;
 let flashRed = false;
-let gameSpeed = 3;
+let gameSpeed = 2;
 let scrollX = 0;
 let frameCount = 0;
 
@@ -233,7 +233,7 @@ function startGame() {
   lives = 3;
   hornCount = 0;
   currentLevel = 1;
-  gameSpeed = 3;
+  gameSpeed = 2;
   obstacles = [];
   collectibles = [];
   particles = [];
@@ -591,152 +591,203 @@ function drawBlueHorn(x, y) {
 
 function drawObstacle(obs) {
   ctx.save();
-  ctx.translate(obs.x, obs.y);
-  const type = obs.typeDef;
+  ctx.translate(obs.x + obs.w / 2, obs.y + obs.h / 2); // draw centred
+
   if (obs.name === 'Goat') {
-    // Goat body
-    ctx.fillStyle = '#9e9e9e';
-    ctx.fillRect(0, 10, 40, 30);
-    // Head
-    ctx.fillStyle = '#bdbdbd';
-    ctx.fillRect(5, 0, 20, 18);
-    // Horns
-    ctx.fillStyle = '#757575';
-    ctx.fillRect(7, -8, 4, 10);
-    ctx.fillRect(19, -8, 4, 10);
-    // Eyes
-    ctx.fillStyle = '#ff5722';
-    ctx.fillRect(10, 5, 4, 4);
-    ctx.fillRect(19, 5, 4, 4);
-    // Legs
-    ctx.fillStyle = '#757575';
-    ctx.fillRect(2, 40, 8, 10);
-    ctx.fillRect(14, 40, 8, 10);
-    ctx.fillRect(22, 40, 8, 10);
-    // Beard
-    ctx.fillStyle = '#eeeeee';
-    ctx.fillRect(8, 16, 8, 8);
-    // Label
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 8px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('GOAT', 20, 58);
+    // ── Cute cartoon goat ──
+    const bx = 0, by = 6; // body centre offset
+
+    // Body — rounded fluffy oval
+    ctx.fillStyle = '#DCDCDC';
+    ctx.beginPath(); ctx.ellipse(bx, by + 10, 20, 14, 0, 0, Math.PI*2); ctx.fill();
+    // Fluffy texture highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.beginPath(); ctx.ellipse(bx - 5, by + 4, 10, 7, -0.3, 0, Math.PI*2); ctx.fill();
+
+    // Head — big round
+    ctx.fillStyle = '#E8E8E8';
+    ctx.beginPath(); ctx.arc(bx + 14, by - 8, 13, 0, Math.PI*2); ctx.fill();
+
+    // Horns — cute stubby curves
+    ctx.fillStyle = '#B0A090';
+    ctx.beginPath(); ctx.ellipse(bx + 9,  by - 19, 3, 6, -0.3, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(bx + 19, by - 19, 3, 6,  0.3, 0, Math.PI*2); ctx.fill();
+
+    // Ears — floppy
+    ctx.fillStyle = '#F0C0B0';
+    ctx.beginPath(); ctx.ellipse(bx + 3,  by - 10, 5, 8, -0.6, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(bx + 25, by - 10, 5, 8,  0.6, 0, Math.PI*2); ctx.fill();
+
+    // Eyes — big cute dots with shine
+    ctx.fillStyle = '#333';
+    ctx.beginPath(); ctx.arc(bx + 10, by - 9, 3.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(bx + 19, by - 9, 3.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(bx + 11, by - 10, 1.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(bx + 20, by - 10, 1.2, 0, Math.PI*2); ctx.fill();
+
+    // Snout
+    ctx.fillStyle = '#F5B8A0';
+    ctx.beginPath(); ctx.ellipse(bx + 14, by - 3, 6, 4, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#C08070';
+    ctx.beginPath(); ctx.arc(bx + 11.5, by - 3, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(bx + 16.5, by - 3, 1.5, 0, Math.PI*2); ctx.fill();
+
+    // Little beard tuft
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.ellipse(bx + 14, by + 3, 4, 5, 0, 0, Math.PI*2); ctx.fill();
+
+    // Legs — 4 stubby rounded legs
+    ctx.fillStyle = '#C8C8C8';
+    [bx-14, bx-5, bx+5, bx+14].forEach(lx => {
+      ctx.beginPath(); ctx.roundRect(lx - 3, by + 20, 7, 12, 3); ctx.fill();
+    });
+    // Hooves
+    ctx.fillStyle = '#888';
+    [bx-14, bx-5, bx+5, bx+14].forEach(lx => {
+      ctx.beginPath(); ctx.ellipse(lx + 0.5, by + 32, 5, 3, 0, 0, Math.PI*2); ctx.fill();
+    });
+
   } else if (obs.name === 'Slutty Pumpkin') {
-    // Pumpkin shape
-    ctx.fillStyle = '#e65100';
-    ctx.beginPath();
-    ctx.ellipse(19, 22, 19, 22, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#bf360c';
-    ctx.fillRect(8, 5, 8, 40);
-    ctx.fillRect(24, 5, 8, 40);
-    // Face
-    ctx.fillStyle = '#1a1a1a';
-    ctx.beginPath();
-    ctx.moveTo(8, 16); ctx.lineTo(16, 20); ctx.lineTo(8, 24); ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(30, 16); ctx.lineTo(22, 20); ctx.lineTo(30, 24); ctx.closePath();
-    ctx.fill();
+    // ── Cute round pumpkin ──
     // Stem
-    ctx.fillStyle = '#33691e';
-    ctx.fillRect(16, -6, 6, 8);
-    // Costume hat suggestion
-    ctx.fillStyle = '#ff6f00';
-    ctx.fillRect(6, -12, 26, 8);
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 6px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('PUMPKIN', 19, 54);
+    ctx.fillStyle = '#5D8A3C';
+    ctx.beginPath(); ctx.roundRect(-4, -26, 8, 10, 4); ctx.fill();
+    // Leaf curl
+    ctx.fillStyle = '#4CAF50';
+    ctx.beginPath(); ctx.ellipse(7, -22, 8, 5, 0.6, 0, Math.PI*2); ctx.fill();
+
+    // Main pumpkin body — three overlapping circles for ribbing
+    const pc = '#E8650A';
+    const pd = '#BF4800';
+    [[-14, 0, 11, 17], [0, 0, 14, 19], [14, 0, 11, 17]].forEach(([ex, ey, rx, ry]) => {
+      ctx.fillStyle = pc;
+      ctx.beginPath(); ctx.ellipse(ex, ey, rx, ry, 0, 0, Math.PI*2); ctx.fill();
+    });
+    // Centre rib highlight
+    ctx.fillStyle = '#F07020';
+    ctx.beginPath(); ctx.ellipse(0, -4, 5, 10, 0, 0, Math.PI*2); ctx.fill();
+
+    // Cute face — triangle eyes & smile
+    ctx.fillStyle = '#2C1200';
+    // Left eye — triangle
+    ctx.beginPath(); ctx.moveTo(-9,-6); ctx.lineTo(-5,-1); ctx.lineTo(-13,-1); ctx.closePath(); ctx.fill();
+    // Right eye
+    ctx.beginPath(); ctx.moveTo(9,-6); ctx.lineTo(13,-1); ctx.lineTo(5,-1); ctx.closePath(); ctx.fill();
+    // Smile — curved
+    ctx.strokeStyle = '#2C1200'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(0, 4, 7, 0.2, Math.PI - 0.2); ctx.stroke();
+    // Little hat (costume!)
+    ctx.fillStyle = '#7B1FA2';
+    ctx.beginPath(); ctx.roundRect(-12, -34, 24, 10, 3); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-8,-34); ctx.lineTo(0,-50); ctx.lineTo(8,-34); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath(); ctx.roundRect(-14,-28,28,5,2); ctx.fill();
+
   } else if (obs.name === 'Pizza') {
-    // Crust (wide wedge)
-    ctx.fillStyle = '#d4956a';
+    // ── Cute pizza slice ──
+    // Crust (rounded at top)
+    ctx.fillStyle = '#D4956A';
     ctx.beginPath();
-    ctx.moveTo(18, 0); ctx.lineTo(36, 36); ctx.lineTo(0, 36);
+    ctx.moveTo(0, 18);
+    ctx.quadraticCurveTo(-20, -12, -14, -18);
+    ctx.quadraticCurveTo(0, -22, 14, -18);
+    ctx.quadraticCurveTo(20, -12, 0, 18);
     ctx.closePath(); ctx.fill();
-    // Crust edge highlight
-    ctx.fillStyle = '#c07a4a';
+    // Crust highlight
+    ctx.fillStyle = '#E8B080';
     ctx.beginPath();
-    ctx.moveTo(18, 0); ctx.lineTo(36, 36); ctx.lineTo(30, 36); ctx.lineTo(18, 6); ctx.lineTo(6, 36); ctx.lineTo(0, 36);
+    ctx.moveTo(0, 12);
+    ctx.quadraticCurveTo(-14, -8, -9, -15);
+    ctx.quadraticCurveTo(0, -17, 9, -15);
+    ctx.quadraticCurveTo(14, -8, 0, 12);
     ctx.closePath(); ctx.fill();
-    // Cheese layer
-    ctx.fillStyle = '#fdd835';
+    // Cheese
+    ctx.fillStyle = '#FDD835';
     ctx.beginPath();
-    ctx.moveTo(18, 6); ctx.lineTo(32, 33); ctx.lineTo(4, 33);
+    ctx.moveTo(0, 8);
+    ctx.quadraticCurveTo(-11, -6, -6, -12);
+    ctx.quadraticCurveTo(0, -13, 6, -12);
+    ctx.quadraticCurveTo(11, -6, 0, 8);
     ctx.closePath(); ctx.fill();
-    // Sauce showing through
-    ctx.fillStyle = '#e53935';
-    ctx.beginPath();
-    ctx.moveTo(18, 10); ctx.lineTo(29, 31); ctx.lineTo(7, 31);
-    ctx.closePath(); ctx.fill();
-    // Cheese blobs on top
-    ctx.fillStyle = '#fff9c4';
-    ctx.beginPath(); ctx.ellipse(18, 22, 5, 4, 0, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(12, 27, 4, 3, 0.3, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(24, 26, 4, 3, -0.3, 0, Math.PI*2); ctx.fill();
+    // Sauce blush
+    ctx.fillStyle = '#E53935';
+    ctx.beginPath(); ctx.ellipse(0, -2, 6, 5, 0, 0, Math.PI*2); ctx.fill();
     // Pepperoni
-    ctx.fillStyle = '#b71c1c';
-    ctx.beginPath(); ctx.arc(18, 20, 4, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(13, 28, 3, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(24, 27, 3, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 7px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('PIZZA', 18, 44);
+    ctx.fillStyle = '#C62828';
+    ctx.beginPath(); ctx.arc(-5, -8, 4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(5, -8, 4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, 2, 3.5, 0, Math.PI*2); ctx.fill();
+    // Pepperoni dots
+    ctx.fillStyle = '#8B0000';
+    [-5,5,0].forEach((px,i) => {
+      const py = i<2 ? -8 : 2;
+      ctx.beginPath(); ctx.arc(px-1, py-1, 1, 0, Math.PI*2); ctx.fill();
+    });
+
   } else if (obs.name === 'Pineapple') {
-    // Body
-    ctx.fillStyle = '#f9a825';
-    ctx.beginPath();
-    ctx.ellipse(14, 28, 13, 22, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Pattern
-    ctx.strokeStyle = '#e65100';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 4; i++) {
-      ctx.beginPath();
-      ctx.moveTo(5, 10 + i*12); ctx.lineTo(23, 16 + i*12);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(23, 10 + i*12); ctx.lineTo(5, 16 + i*12);
-      ctx.stroke();
-    }
-    // Leaves
-    ctx.fillStyle = '#388e3c';
-    ctx.beginPath();
-    ctx.moveTo(14, 6); ctx.lineTo(5, -10); ctx.lineTo(9, 8);
-    ctx.closePath(); ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(14, 6); ctx.lineTo(14, -14); ctx.lineTo(17, 6);
-    ctx.closePath(); ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(14, 6); ctx.lineTo(23, -10); ctx.lineTo(19, 8);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 6px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('PINE', 14, 56);
+    // ── Cute pineapple ──
+    // Leaves on top — fan of rounded leaves
+    const leafCol = ['#388E3C','#43A047','#2E7D32'];
+    [[-10,-28,-0.5],[-2,-32,0],[10,-28,0.5]].forEach(([lx,ly,rot],i) => {
+      ctx.save(); ctx.translate(lx,ly); ctx.rotate(rot);
+      ctx.fillStyle = leafCol[i];
+      ctx.beginPath(); ctx.ellipse(0, 0, 5, 12, 0, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    });
+
+    // Body — golden rounded rectangle
+    ctx.fillStyle = '#F9A825';
+    ctx.beginPath(); ctx.roundRect(-13, -18, 26, 34, 10); ctx.fill();
+    // Texture grid
+    ctx.strokeStyle = '#E65100'; ctx.lineWidth = 1.2;
+    for (let row = -12; row < 14; row += 7)
+      for (let col = -9; col < 12; col += 7) {
+        ctx.beginPath(); ctx.roundRect(col, row, 5, 5, 2); ctx.stroke();
+      }
+    // Face — big cute eyes
+    ctx.fillStyle = '#333';
+    ctx.beginPath(); ctx.arc(-5, -2, 3.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(5, -2, 3.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-4, -3, 1.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(6, -3, 1.2, 0, Math.PI*2); ctx.fill();
+    // Smile
+    ctx.strokeStyle = '#5D3000'; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.arc(0, 4, 5, 0.2, Math.PI-0.2); ctx.stroke();
+    // Rosy cheeks
+    ctx.fillStyle = 'rgba(220,80,50,0.2)';
+    ctx.beginPath(); ctx.ellipse(-8, 5, 4, 3, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(8, 5, 4, 3, 0, 0, Math.PI*2); ctx.fill();
+
   } else if (obs.name === 'Red Boots') {
-    // Boot shape
-    ctx.fillStyle = '#c62828';
-    ctx.fillRect(0, 0, 45, 20);
-    ctx.fillRect(0, 20, 25, 18);
+    // ── Cute cowboy boot ──
+    // Shaft (tall part of boot)
+    ctx.fillStyle = '#C0392B';
+    ctx.beginPath(); ctx.roundRect(-10, -22, 22, 26, [8,8,0,0]); ctx.fill();
+    // Shaft highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.beginPath(); ctx.roundRect(-7, -20, 8, 16, 5); ctx.fill();
+    // Foot
+    ctx.fillStyle = '#C0392B';
+    ctx.beginPath(); ctx.roundRect(-12, 4, 28, 14, [0,0,6,6]); ctx.fill();
+    // Toe — rounded
+    ctx.beginPath(); ctx.ellipse(10, 11, 8, 7, 0, 0, Math.PI*2); ctx.fill();
     // Sole
-    ctx.fillStyle = '#b71c1c';
-    ctx.fillRect(-2, 35, 28, 5);
-    // Boot toe
-    ctx.fillStyle = '#c62828';
-    ctx.beginPath();
-    ctx.ellipse(12, 38, 16, 5, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Star detail
-    ctx.fillStyle = '#ff8f00';
-    ctx.font = '12px serif';
+    ctx.fillStyle = '#922B21';
+    ctx.beginPath(); ctx.roundRect(-14, 14, 32, 6, 4); ctx.fill();
+    // Decorative stitching line
+    ctx.strokeStyle = '#E8A090'; ctx.lineWidth = 1.5;
+    ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(-7,-18); ctx.lineTo(-7, 3); ctx.stroke();
+    ctx.setLineDash([]);
+    // Star
+    ctx.fillStyle = '#FFD700';
+    ctx.font = 'bold 13px serif';
     ctx.textAlign = 'center';
-    ctx.fillText('★', 22, 14);
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 6px monospace';
-    ctx.fillText('BOOTS', 22, 50);
+    ctx.fillText('★', 4, -4);
   }
+
   ctx.restore();
 }
 
@@ -1297,7 +1348,7 @@ function update(dt) {
     obstacleTimer -= dt;
     if (obstacleTimer <= 0) {
       spawnObstacle();
-      obstacleTimer = 900 + Math.random() * 800;
+      obstacleTimer = 1800 + Math.random() * 1200;
     }
     // Spawn collectibles
     collectibleTimer -= dt;
@@ -1364,7 +1415,7 @@ function update(dt) {
     }
 
     // Speed up over time
-    if (frameCount % 600 === 0) gameSpeed = Math.min(gameSpeed + 0.3, 9);
+    if (frameCount % 900 === 0) gameSpeed = Math.min(gameSpeed + 0.2, 6);
   }
 
   if (state === STATES.BOSS) {
