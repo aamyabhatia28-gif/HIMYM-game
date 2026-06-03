@@ -1320,27 +1320,16 @@ let endingTimer = 0;
 let endingStep = 0; // 0=walking in, 1=meeting, 2=horn offered, 3=fade
 
 function transitionToNextLevel() {
-  if (currentLevel === 3) {
-    // Final boss beaten — trigger ending cutscene
-    obstacles = [];
-    collectibles = [];
-    bossProjectiles = [];
-    boss = null;
-    bossPhase = false;
-    endingTimer = 0;
-    endingStep = 0;
-    state = STATES.ENDING;
-    return;
-  }
-  currentLevel++;
-  gameSpeed += 0.5;
+  // Every boss defeat leads to the ending cutscene
   obstacles = [];
   collectibles = [];
   bossProjectiles = [];
+  playerProjectiles = [];
   boss = null;
   bossPhase = false;
-  initParallax(currentLevel);
-  state = STATES.PLAYING;
+  endingTimer = 0;
+  endingStep = 0;
+  state = STATES.ENDING;
 }
 
 function drawEnding() {
