@@ -459,60 +459,71 @@ function drawCartoonChar(cx, baseY, isTed, ducking) {
     /* BODY — red top */
     ctx.fillStyle = '#C0392B';
     ctx.beginPath(); ctx.roundRect(cx - 14, bodyY, 28, bodyH, [3,3,6,6]); ctx.fill();
-    // neckline highlight
     ctx.fillStyle = 'rgba(255,255,255,0.15)';
     ctx.beginPath(); ctx.ellipse(cx, bodyY+2, 7, 4, 0, Math.PI, Math.PI*2); ctx.fill();
 
-    /* HEAD */
-    // long hair behind (drawn first so it's behind face)
-    ctx.fillStyle = '#2C1810';
-    ctx.beginPath(); ctx.ellipse(cx, headCY+4, headR+3, headR+6, 0, 0, Math.PI*2); ctx.fill();
-    // ears
+    /* HEAD — draw ears first, then face */
     ctx.fillStyle = skinDark;
-    ctx.beginPath(); ctx.ellipse(cx-headR, headCY, 4, 5, 0, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(cx+headR, headCY, 4, 5, 0, 0, Math.PI*2); ctx.fill();
-    // face
+    ctx.beginPath(); ctx.ellipse(cx - headR, headCY, 4, 5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + headR, headCY, 4, 5, 0, 0, Math.PI*2); ctx.fill();
+
+    // Face — slightly oval (taller than wide), feminine
     ctx.fillStyle = skin;
-    ctx.beginPath(); ctx.arc(cx, headCY, headR, 0, Math.PI*2); ctx.fill();
-    // hair on top
+    ctx.beginPath(); ctx.ellipse(cx, headCY + 1, headR - 1, headR + 1, 0, 0, Math.PI*2); ctx.fill();
+
+    // Hair top — dark cap sitting ON TOP of head
     ctx.fillStyle = '#2C1810';
-    ctx.beginPath(); ctx.arc(cx, headCY, headR, Math.PI, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(cx, headCY - headR + 2, headR, 8, 0, Math.PI, Math.PI*2); ctx.fill();
-    // eyebrows (arched, feminine)
-    ctx.strokeStyle = '#1a0a00'; ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.arc(cx-5, headCY-2, 4.5, Math.PI+0.5, Math.PI*2-0.5); ctx.stroke();
-    ctx.beginPath(); ctx.arc(cx+5, headCY-2, 4.5, Math.PI+0.5, Math.PI*2-0.5); ctx.stroke();
-    // eyes — bigger, with lashes
+    ctx.beginPath(); ctx.ellipse(cx, headCY - 4, headR, 9, 0, Math.PI, Math.PI*2); ctx.fill();
+    // Side hair — two smooth strands framing the face (not wrapping under chin)
+    ctx.beginPath(); ctx.ellipse(cx - headR - 1, headCY + 4, 5, 12, -0.15, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + headR + 1, headCY + 4, 5, 12,  0.15, 0, Math.PI*2); ctx.fill();
+
+    // Eyebrows — thin, high, arched
+    ctx.strokeStyle = '#1a0800'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx - 5, headCY - 3, 4.5, Math.PI + 0.5, Math.PI*2 - 0.5); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx + 5, headCY - 3, 4.5, Math.PI + 0.5, Math.PI*2 - 0.5); ctx.stroke();
+
+    // Eyes — big, almond-shaped
     ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.ellipse(cx-5, headCY+2, 4.5, 4, 0, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(cx+5, headCY+2, 4.5, 4, 0, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#2E4057';
-    ctx.beginPath(); ctx.arc(cx-5, headCY+2.5, 2.8, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(cx+5, headCY+2.5, 2.8, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx - 5, headCY + 2, 5, 4, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + 5, headCY + 2, 5, 4, 0, 0, Math.PI*2); ctx.fill();
+    // Iris — blue-grey
+    ctx.fillStyle = '#4A6FA5';
+    ctx.beginPath(); ctx.arc(cx - 5, headCY + 2.5, 2.8, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 5, headCY + 2.5, 2.8, 0, Math.PI*2); ctx.fill();
+    // Pupil
     ctx.fillStyle = '#111';
-    ctx.beginPath(); ctx.arc(cx-5, headCY+2.5, 1.4, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(cx+5, headCY+2.5, 1.4, 0, Math.PI*2); ctx.fill();
-    // catchlight
+    ctx.beginPath(); ctx.arc(cx - 5, headCY + 2.5, 1.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 5, headCY + 2.5, 1.4, 0, Math.PI*2); ctx.fill();
+    // Catchlight
     ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(cx-4, headCY+1.5, 0.7, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(cx+6, headCY+1.5, 0.7, 0, Math.PI*2); ctx.fill();
-    // lashes (top lid, 3 each eye)
+    ctx.beginPath(); ctx.arc(cx - 4, headCY + 1.5, 0.7, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 6, headCY + 1.5, 0.7, 0, Math.PI*2); ctx.fill();
+    // Lashes — top lid only, short strokes fanning up
     ctx.strokeStyle = '#111'; ctx.lineWidth = 1.2;
-    [[-8,-1],[-5,0],[-2,-0.5]].forEach(([dx,dy]) => {
-      ctx.beginPath(); ctx.moveTo(cx-5+dx*0.6, headCY-2+dy); ctx.lineTo(cx-5+dx, headCY-5+dy); ctx.stroke();
+    [[-5,0],[-3,-0.5],[-1,-1],[1,-0.5]].forEach(([dx,dy]) => {
+      ctx.beginPath();
+      ctx.moveTo(cx - 5 + dx*0.6, headCY - 1.5 + dy);
+      ctx.lineTo(cx - 5 + dx, headCY - 4 + dy);
+      ctx.stroke();
     });
-    [[2,-0.5],[5,0],[8,-1]].forEach(([dx,dy]) => {
-      ctx.beginPath(); ctx.moveTo(cx+5+dx*0.4, headCY-2+dy); ctx.lineTo(cx+5+dx*0.8, headCY-5+dy); ctx.stroke();
+    [[5,0],[3,-0.5],[1,-1],[-1,-0.5]].forEach(([dx,dy]) => {
+      ctx.beginPath();
+      ctx.moveTo(cx + 5 + dx*0.6, headCY - 1.5 + dy);
+      ctx.lineTo(cx + 5 + dx, headCY - 4 + dy);
+      ctx.stroke();
     });
-    // rosy cheeks
-    ctx.fillStyle = 'rgba(240,130,100,0.25)';
-    ctx.beginPath(); ctx.ellipse(cx-9, headCY+6, 5, 3, 0, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(cx+9, headCY+6, 5, 3, 0, 0, Math.PI*2); ctx.fill();
-    // lips
-    ctx.fillStyle = '#D45D5D';
-    ctx.beginPath(); ctx.ellipse(cx, headCY+9, 5, 2.5, 0, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#F28B8B';
-    ctx.beginPath(); ctx.ellipse(cx, headCY+8, 4, 1.5, 0, 0, Math.PI); ctx.fill();
+
+    // Rosy cheeks
+    ctx.fillStyle = 'rgba(240,120,100,0.22)';
+    ctx.beginPath(); ctx.ellipse(cx - 9, headCY + 6, 5, 3, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + 9, headCY + 6, 5, 3, 0, 0, Math.PI*2); ctx.fill();
+
+    // Lips — clearly pink, two-tone
+    ctx.fillStyle = '#E05C6A';
+    ctx.beginPath(); ctx.ellipse(cx, headCY + 9, 5, 2.5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#F4A0A8';
+    ctx.beginPath(); ctx.ellipse(cx, headCY + 8, 3.5, 1.5, 0, 0, Math.PI); ctx.fill();
   }
 
   ctx.restore();
