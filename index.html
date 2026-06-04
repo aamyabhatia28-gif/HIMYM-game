@@ -1798,7 +1798,7 @@ function drawEnding() {
 
   const t = endingTimer;
   // Who Ted meets depends on what he collected more of
-  const meetsTracy = umbrellaCount >= hornCount;
+  const meetsTracy = umbrellaCount > hornCount;
   const partnerName = meetsTracy ? 'Tracy' : 'Robin';
   const playerName  = 'Ted';
 
@@ -2005,7 +2005,7 @@ function update(dt) {
 
     if (boss && !showBossIntro) {
       // Boss stays right of centre — never walks onto the player
-      const bossMinX = 250, bossMaxX = 680;
+      const bossMinX = 180, bossMaxX = 330;
       if (boss.type === 1) {
         boss.x += boss.vx * 2;
         if (boss.x < bossMinX) boss.vx = Math.abs(boss.vx);
@@ -2064,7 +2064,7 @@ function update(dt) {
         proj.x += proj.vx;
         proj.vy += 0.2;
         proj.y += proj.vy;
-        if (proj.x < -20 || proj.y > 420) { bossProjectiles.splice(i, 1); continue; }
+        if (proj.x < -20 || proj.y > 650) { bossProjectiles.splice(i, 1); continue; }
         // Collision with player
         const pbox = { x: player.x + 4, y: player.y + 4, w: player.w - 8, h: player.h - 8 };
         const prbox = { x: proj.x - 10, y: proj.y - 10, w: 20, h: 20 };
@@ -2097,7 +2097,7 @@ function update(dt) {
           if (!pp.isSword) pp.vy += 0.25; // only gravity on non-sword projectiles
           pp.x += pp.vx;
           pp.y += pp.vy;
-          if (pp.x > 850 || pp.y > 420) { playerProjectiles.splice(i, 1); continue; }
+          if (pp.x > 450 || pp.y > 650) { playerProjectiles.splice(i, 1); continue; }
           if (checkAABB({ x: pp.x, y: pp.y, w: pp.w, h: pp.h }, bossHitBox)) {
             playerProjectiles.splice(i, 1);
             boss.hp--;
