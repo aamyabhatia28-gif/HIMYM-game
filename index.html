@@ -1777,88 +1777,91 @@ function drawEnding() {
     ctx.fillStyle = `rgba(255,255,255,${0.4 + 0.6 * Math.abs(Math.sin(i))})`;
     ctx.beginPath(); ctx.arc(sx, sy, 1.2, 0, Math.PI*2); ctx.fill();
   }
-  // Buildings silhouette with gradient
+  // Buildings silhouette
   const bldgs = [[0,180,50,420],[55,120,60,480],[120,225,45,375],[170,90,55,510],[230,150,50,450],[285,210,45,390],[335,135,45,465]];
   bldgs.forEach(([bx,by,bw,bh]) => {
     const bg = ctx.createLinearGradient(bx, by, bx, by+bh);
     bg.addColorStop(0, '#1e2640'); bg.addColorStop(1, '#141928');
     ctx.fillStyle = bg; ctx.fillRect(bx, by, bw, bh);
-    // Windows
     for (let wy = by+10; wy < by+bh-15; wy += 18)
       for (let wx = bx+8; wx < bx+bw-8; wx += 14)
         if (Math.sin(wx*wy) > -0.3) { ctx.fillStyle='rgba(255,220,100,0.7)'; ctx.fillRect(wx,wy,6,8); }
   });
-  // Street gradient
-  const streetG = ctx.createLinearGradient(0,487,0,600);
+  // Street
+  const streetG = ctx.createLinearGradient(0, 487, 0, 600);
   streetG.addColorStop(0,'#2a3040'); streetG.addColorStop(1,'#1a2030');
   ctx.fillStyle = streetG; ctx.fillRect(0, 487, 400, 113);
-  ctx.fillStyle = '#3a4555'; ctx.fillRect(0, 323, 800, 5);
-  // Street center line
-  for (let i=0; i<800; i+=60) { ctx.fillStyle='rgba(255,220,50,0.3)'; ctx.fillRect(i,360,40,4); }
+  ctx.fillStyle = '#3a4555'; ctx.fillRect(0, 487, 400, 5);
+  for (let i = 0; i < 400; i += 60) { ctx.fillStyle='rgba(255,220,50,0.3)'; ctx.fillRect(i, 520, 30, 4); }
 
   const t = endingTimer;
-  // Who Ted meets depends on what he collected more of
   const meetsTracy = umbrellaCount > hornCount;
   const partnerName = meetsTracy ? 'Tracy' : 'Robin';
   const playerName  = 'Ted';
 
-  // Ted walks in from left
-  const playerCX = -40 + Math.min(t / 90, 1) * 380;
-  drawCartoonChar(playerCX, 270, true, false);
+  // Ted walks in from left — final resting x=90
+  const playerCX = Math.round(-50 + Math.min(t / 90, 1) * 140);
+  drawCartoonChar(playerCX, GROUND, true, false);
 
-  // Partner walks in from right (starts at frame 60)
+  // Partner walks in from right (starts at frame 60) — final resting x=290
   if (t >= 60) {
-    const partnerCX = 860 + Math.min((t - 60) / 90, 1) * (500 - 860);
+    const partnerCX = Math.round(450 + Math.min((t - 60) / 90, 1) * (290 - 450));
     if (meetsTracy) {
-      drawYellowUmbrella(partnerCX + 10, 238);
-      drawTracy(partnerCX, 270);
+      drawYellowUmbrella(partnerCX + 10, GROUND - 30);
+      drawTracy(partnerCX, GROUND);
     } else {
-      drawCartoonChar(partnerCX, 270, false, false);
+      drawCartoonChar(partnerCX, GROUND, false, false);
     }
   }
 
-  // Horn floats between them (frame 150+)
+  // Speech bubble between them (frame 150+)
   if (t >= 150) {
-    const hornBob = Math.sin(t * 0.08) * 5;
-    drawBlueHorn(390, 255 + hornBob);
-    // Speech bubble
-    ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.shadowColor = 'rgba(0,0,0,0.2)'; ctx.shadowBlur = 8;
-    ctx.beginPath(); ctx.roundRect(250, 175, 300, 60, 12); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#1a1a1a'; ctx.font = 'bold 12px Georgia,serif'; ctx.textAlign = 'center';
-    const line1 = meetsTracy ? '"Hi, I\'m Tracy. Nice umbrella weather."' : '"I would get the whole orchestra for you."';
+    const line1 = meetsTracy ? '"Hi, I\'m Tracy."' : '"I\'d get the whole orchestra for you."';
     const line2 = meetsTracy ? '"Ted Mosby. I\'ve been looking for you."' : '"You already have it, Ted."';
-    ctx.fillText(line1, 200, 290); ctx.fillText(line2, 200, 316);
     ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.beginPath(); ctx.moveTo(370,235); ctx.lineTo(390,255); ctx.lineTo(410,235); ctx.closePath(); ctx.fill();
+    ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.roundRect(30, 340, 340, 70, 12); ctx.fill();
+    ctx.shadowBlur = 0;
+    // Bubble tail
+    ctx.beginPath(); ctx.moveTo(90, 410); ctx.lineTo(80, 430); ctx.lineTo(110, 410); ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fill();
+    ctx.fillStyle = '#1a1a1a'; ctx.font = 'italic 13px Georgia,serif'; ctx.textAlign = 'center';
+    ctx.fillText(line1, 200, 368);
+    ctx.fillText(line2, 200, 392);
   }
 
   // Fade to title card (frame 260+)
   if (t >= 260) {
     const alpha = Math.min((t - 260) / 70, 1);
     ctx.globalAlpha = alpha;
-    ctx.fillStyle = '#0a0f1e'; ctx.fillRect(0,0,800,400);
-    ctx.fillStyle = '#1e88e5'; ctx.font = 'bold 34px Georgia,serif'; ctx.textAlign = 'center';
-    ctx.fillText('And that, kids…', 200, 180);
-    ctx.fillStyle = '#fdd835';
-    ctx.font = 'bold 22px monospace';
-    ctx.fillText(`is how ${playerName} met ${partnerName}.`, 200, 250);
-    // Decorations
-    if (meetsTracy) {
-      drawYellowUmbrella(255, 238); drawTracy(530, 255);
-    } else {
-      drawBlueHorn(268, 228); drawBlueHorn(468, 228);
-    }
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '14px monospace';
-    ctx.fillText(`Score: ${score}  |  🎺 ${hornCount}  |  ☂ ${umbrellaCount}`, 200, 430);
-    ctx.fillStyle = '#aaaaaa';
-    ctx.font = '13px monospace';
-    ctx.fillText('Press SPACE to play again', 200, 490);
+    ctx.fillStyle = '#0a0f1e'; ctx.fillRect(0, 0, 400, 600);
     ctx.globalAlpha = 1;
+
+    ctx.fillStyle = '#1e88e5'; ctx.font = 'bold 30px Georgia,serif'; ctx.textAlign = 'center';
+    ctx.fillText('And that, kids…', 200, 160);
+    ctx.fillStyle = '#fdd835';
+    ctx.font = 'bold 20px Georgia,serif';
+    ctx.fillText(`is how ${playerName} met ${partnerName}.`, 200, 210);
+
+    // Draw the couple side by side
+    const tedX = meetsTracy ? 110 : 130;
+    const partX = meetsTracy ? 270 : 260;
+    drawCartoonChar(tedX, GROUND - 30, true, false);
+    if (meetsTracy) {
+      drawYellowUmbrella(partX + 10, GROUND - 60);
+      drawTracy(partX, GROUND - 30);
+    } else {
+      drawBlueHorn(tedX - 10, GROUND - 90);
+      drawCartoonChar(partX, GROUND - 30, false, false);
+    }
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '13px monospace';
+    ctx.fillText(`Score: ${score}  |  🎺 ${hornCount}  |  ☂ ${umbrellaCount}`, 200, 510);
+    ctx.fillStyle = '#aaaaaa';
+    ctx.font = '12px monospace';
+    ctx.fillText('Press SPACE to play again', 200, 545);
   } else {
-    // Show score in corner
     ctx.fillStyle = 'white';
     ctx.font = 'bold 13px monospace';
     ctx.textAlign = 'left';
