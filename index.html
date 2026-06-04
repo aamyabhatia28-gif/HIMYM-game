@@ -584,6 +584,126 @@ function drawCartoonChar(cx, baseY, isTed, ducking) {
   ctx.restore();
 }
 
+function drawTracy(cx, baseY) {
+  ctx.save();
+
+  const headR  = 13;
+  const headCY = baseY + headR;
+  const bodyY  = headCY + headR - 2;
+  const bodyH  = 22;
+  const legY   = bodyY + bodyH;
+  const skin   = '#FACBA0';
+  const skinDk = '#E8A87C';
+
+  // ── Dress — yellow A-line, flares wide at hem ──
+  // Skirt flare (drawn first so legs show underneath)
+  ctx.fillStyle = '#F9A825';
+  ctx.beginPath();
+  ctx.moveTo(cx - 14, legY);
+  ctx.quadraticCurveTo(cx - 26, legY + 28, cx - 22, legY + 36);
+  ctx.lineTo(cx + 22, legY + 36);
+  ctx.quadraticCurveTo(cx + 26, legY + 28, cx + 14, legY);
+  ctx.closePath(); ctx.fill();
+  // Skirt highlight
+  ctx.fillStyle = '#FDD835';
+  ctx.beginPath();
+  ctx.moveTo(cx - 4, legY);
+  ctx.quadraticCurveTo(cx - 8, legY + 18, cx - 6, legY + 34);
+  ctx.lineTo(cx + 2, legY + 34);
+  ctx.quadraticCurveTo(cx + 4, legY + 18, cx + 4, legY);
+  ctx.closePath(); ctx.fill();
+  // Skirt fold shadow
+  ctx.fillStyle = '#F57F17';
+  ctx.beginPath();
+  ctx.moveTo(cx + 8, legY);
+  ctx.quadraticCurveTo(cx + 20, legY + 18, cx + 20, legY + 36);
+  ctx.lineTo(cx + 22, legY + 36);
+  ctx.quadraticCurveTo(cx + 26, legY + 28, cx + 14, legY);
+  ctx.closePath(); ctx.fill();
+  // Small feet peeking out
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.ellipse(cx - 8, legY + 36, 7, 3, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 8, legY + 36, 7, 3, 0, 0, Math.PI*2); ctx.fill();
+
+  // ── Bodice — yellow, fitted ──
+  ctx.fillStyle = '#FBC02D';
+  ctx.beginPath(); ctx.roundRect(cx - 13, bodyY, 26, bodyH, [3,3,0,0]); ctx.fill();
+  // Neckline detail
+  ctx.fillStyle = '#F9A825';
+  ctx.beginPath(); ctx.ellipse(cx, bodyY + 2, 7, 4, 0, Math.PI, Math.PI*2); ctx.fill();
+  // Belt
+  ctx.fillStyle = '#E65100';
+  ctx.beginPath(); ctx.roundRect(cx - 13, bodyY + bodyH - 6, 26, 5, 2); ctx.fill();
+
+  // ── Head ──
+  // Ears
+  ctx.fillStyle = skinDk;
+  ctx.beginPath(); ctx.ellipse(cx - headR, headCY, 4, 5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + headR, headCY, 4, 5, 0, 0, Math.PI*2); ctx.fill();
+  // Face — soft oval
+  ctx.fillStyle = skin;
+  ctx.beginPath(); ctx.ellipse(cx, headCY + 1, headR - 1, headR + 1, 0, 0, Math.PI*2); ctx.fill();
+
+  // ── Hair — chestnut, wavy, side-parted ──
+  const hc = '#8B4513';
+  const hh = '#C1733A'; // highlight
+  // Back volume (drawn behind face in places)
+  ctx.fillStyle = hc;
+  ctx.beginPath(); ctx.ellipse(cx + 3, headCY, headR + 3, headR + 4, 0.2, Math.PI*0.9, Math.PI*2.1); ctx.fill();
+  // Top cap
+  ctx.beginPath(); ctx.ellipse(cx, headCY - 3, headR, 10, 0, Math.PI, Math.PI*2); ctx.fill();
+  // Left wave sweeping down past cheek
+  ctx.beginPath();
+  ctx.moveTo(cx - headR, headCY - 4);
+  ctx.bezierCurveTo(cx - headR - 6, headCY + 4, cx - headR - 4, headCY + 14, cx - headR, headCY + 18);
+  ctx.bezierCurveTo(cx - headR + 4, headCY + 20, cx - 8, headCY + 12, cx - headR, headCY + 4);
+  ctx.closePath(); ctx.fill();
+  // Hair highlight wave
+  ctx.fillStyle = hh;
+  ctx.beginPath(); ctx.ellipse(cx - 3, headCY - 9, 7, 4, -0.3, Math.PI*1.1, Math.PI*1.9); ctx.fill();
+
+  // ── Eyebrows — soft arched ──
+  ctx.strokeStyle = '#5C2E00'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(cx - 5, headCY - 3, 4, Math.PI + 0.4, Math.PI*2 - 0.4); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx + 5, headCY - 3, 4, Math.PI + 0.4, Math.PI*2 - 0.4); ctx.stroke();
+
+  // ── Eyes — warm hazel ──
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(cx - 5, headCY + 2, 4.5, 3.5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 5, headCY + 2, 4.5, 3.5, 0, 0, Math.PI*2); ctx.fill();
+  // Iris — hazel green-brown
+  ctx.fillStyle = '#7B5E2A';
+  ctx.beginPath(); ctx.arc(cx - 5, headCY + 2, 2.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 5, headCY + 2, 2.5, 0, Math.PI*2); ctx.fill();
+  // Green fleck
+  ctx.fillStyle = '#5D8A3C';
+  ctx.beginPath(); ctx.arc(cx - 4.5, headCY + 1.5, 1, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 5.5, headCY + 1.5, 1, 0, Math.PI*2); ctx.fill();
+  // Pupil
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.arc(cx - 5, headCY + 2, 1.2, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 5, headCY + 2, 1.2, 0, Math.PI*2); ctx.fill();
+  // Catchlight
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(cx - 4, headCY + 1, 0.6, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 6, headCY + 1, 0.6, 0, Math.PI*2); ctx.fill();
+
+  // Rosy cheeks
+  ctx.fillStyle = 'rgba(230,110,80,0.2)';
+  ctx.beginPath(); ctx.ellipse(cx - 9, headCY + 6, 5, 3, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 9, headCY + 6, 5, 3, 0, 0, Math.PI*2); ctx.fill();
+
+  // ── Warm smile — wider and softer than Robin's ──
+  ctx.strokeStyle = '#b5673a'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.arc(cx, headCY + 6, 5.5, 0.1, Math.PI - 0.1); ctx.stroke();
+  // Smile dimple dots
+  ctx.fillStyle = 'rgba(180,90,50,0.4)';
+  ctx.beginPath(); ctx.arc(cx - 5.5, headCY + 7, 1, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 5.5, headCY + 7, 1, 0, Math.PI*2); ctx.fill();
+
+  ctx.restore();
+}
+
 function drawPlayer() {
   const p = player;
   if (invincible && Math.floor(frameCount / 4) % 2 === 0) return;
@@ -1469,9 +1589,8 @@ function drawEnding() {
   if (t >= 60) {
     const partnerCX = 860 + Math.min((t - 60) / 90, 1) * (500 - 860);
     if (meetsTracy) {
-      // Tracy — yellow dress, holding yellow umbrella
-      drawYellowUmbrella(partnerCX + 10, 240);
-      drawCartoonChar(partnerCX, 270, false, false);
+      drawYellowUmbrella(partnerCX + 10, 238);
+      drawTracy(partnerCX, 270);
     } else {
       drawCartoonChar(partnerCX, 270, false, false);
     }
@@ -1487,8 +1606,8 @@ function drawEnding() {
     ctx.beginPath(); ctx.roundRect(250, 175, 300, 60, 12); ctx.fill();
     ctx.shadowBlur = 0;
     ctx.fillStyle = '#1a1a1a'; ctx.font = 'bold 12px Georgia,serif'; ctx.textAlign = 'center';
-    const line1 = meetsTracy ? '"Hi, I\'m Tracy. Nice umbrella weather."' : '"Robin… I got this for you."';
-    const line2 = meetsTracy ? '"Ted Mosby. I\'ve been looking for you."' : '"I searched every level for you."';
+    const line1 = meetsTracy ? '"Hi, I\'m Tracy. Nice umbrella weather."' : '"I would get the whole orchestra for you."';
+    const line2 = meetsTracy ? '"Ted Mosby. I\'ve been looking for you."' : '"You already have it, Ted."';
     ctx.fillText(line1, 400, 200); ctx.fillText(line2, 400, 220);
     ctx.fillStyle = 'rgba(255,255,255,0.95)';
     ctx.beginPath(); ctx.moveTo(370,235); ctx.lineTo(390,255); ctx.lineTo(410,235); ctx.closePath(); ctx.fill();
@@ -1506,9 +1625,9 @@ function drawEnding() {
     ctx.fillText(`is how ${playerName} met ${partnerName}.`, 400, 180);
     // Decorations
     if (meetsTracy) {
-      drawYellowUmbrella(275, 240); drawYellowUmbrella(470, 240);
+      drawYellowUmbrella(255, 238); drawTracy(530, 255);
     } else {
-      drawBlueHorn(280, 230); drawBlueHorn(480, 230);
+      drawBlueHorn(268, 228); drawBlueHorn(468, 228);
     }
     ctx.fillStyle = '#ffffff';
     ctx.font = '14px monospace';
