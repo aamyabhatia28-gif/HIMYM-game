@@ -1349,13 +1349,13 @@ function drawBoss(boss) {
     // Head (rounded)
     ctx.fillStyle = '#f5cba7';
     ctx.beginPath(); ctx.ellipse(35, 16, 18, 17, 0, 0, Math.PI*2); ctx.fill();
-    // Hair (short, brown, side-parted)
-    ctx.fillStyle = '#795548';
-    ctx.beginPath(); ctx.ellipse(35, 4, 18, 10, 0, 0, Math.PI); ctx.fill();
-    ctx.fillRect(17, 4, 36, 6);
-    // Side part
-    ctx.fillStyle = '#f5cba7';
-    ctx.beginPath(); ctx.moveTo(28, 0); ctx.lineTo(28, 8); ctx.lineTo(32, 8); ctx.lineTo(32, 0); ctx.closePath(); ctx.fill();
+    // Hair (short, blonde, slicked back)
+    ctx.fillStyle = '#D4A017';
+    ctx.beginPath(); ctx.ellipse(35, 4, 18, 11, 0, 0, Math.PI); ctx.fill();
+    ctx.fillRect(17, 4, 36, 7);
+    // Highlight streak
+    ctx.fillStyle = '#F0C040';
+    ctx.beginPath(); ctx.ellipse(32, 3, 7, 4, -0.2, 0, Math.PI); ctx.fill();
     // Eyes
     ctx.fillStyle = '#fff';
     ctx.beginPath(); ctx.ellipse(28, 17, 5, 5, 0, 0, Math.PI*2); ctx.fill();
