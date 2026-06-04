@@ -71,7 +71,7 @@ const STATES = { START: 0, PLAYING: 1, BOSS: 2, GAME_OVER: 3, TRANSITION: 4, END
 let state = STATES.START;
 let selectedChar = 'ted';
 let score = 0;
-let lives = 3;
+let lives = 5;
 let hornCount = 0;
 let umbrellaCount = 0;
 
@@ -296,7 +296,7 @@ canvas.addEventListener('click', e => {
 function startGame() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   score = 0;
-  lives = 3;
+  lives = 5;
   hornCount = 0;
   umbrellaCount = 0;
   currentLevel = 1;
@@ -455,10 +455,12 @@ function drawParallax(level) {
       }
     } else if (level === 3) {
       if (layer.type === 'building') {
+        // Anchor building bottom to ground; layer.h is building height
+        const bTop = GROUND + 48 - layer.h;
         ctx.fillStyle = '#374151';
-        ctx.fillRect(px, layer.y, layer.w, layer.h);
+        ctx.fillRect(px, bTop, layer.w, layer.h);
         ctx.fillStyle = '#fbbf24';
-        for (let wy = layer.y + 10; wy < layer.y + layer.h - 10; wy += 20)
+        for (let wy = bTop + 10; wy < bTop + layer.h - 10; wy += 20)
           for (let wx = px + 8; wx < px + layer.w - 8; wx += 16)
             if (Math.random() > 0.3) ctx.fillRect(wx, wy, 8, 10);
       }
@@ -1521,16 +1523,12 @@ function drawHUD() {
   // Level
   ctx.textAlign = 'center';
   ctx.fillText(LEVELS[currentLevel].name, 200, 22);
-  // Lives (hearts)
-  ctx.textAlign = 'right';
-  let heartsStr = '';
-  for (let i = 0; i < 3; i++) { heartsStr += i < lives ? '♥ ' : '♡ '; }
-  ctx.fillStyle = i => i < lives ? '#e53935' : '#555';
-  ctx.fillStyle = '#e53935';
-  for (let i = 0; i < 3; i++) {
-    ctx.fillStyle = i < lives ? '#e53935' : '#444';
-    ctx.font = '18px serif';
-    ctx.fillText('♥', 780 - i * 22, 22);
+  // Lives (hearts) — 5 hearts, right-aligned within 400px canvas
+  ctx.font = '16px serif';
+  for (let i = 0; i < 5; i++) {
+    ctx.fillStyle = i < lives ? '#e53935' : '#333';
+    ctx.textAlign = 'right';
+    ctx.fillText('♥', 392 - i * 18, 22);
   }
   // Collectible counts
   ctx.font = 'bold 12px monospace';
