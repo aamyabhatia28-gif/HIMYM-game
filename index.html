@@ -6,9 +6,9 @@
 <title>How I Met Your Mother</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #1a1a2e; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; font-family: 'Courier New', monospace; }
-  #canvasWrapper { position: relative; }
-  canvas { display: block; }
+  body { background: #0a0f1e; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; font-family: 'Courier New', monospace; }
+  #canvasWrapper { position: relative; width: 100%; max-width: 800px; }
+  canvas { display: block; width: 100%; height: auto; touch-action: none; }
 </style>
 </head>
 <body>
@@ -1268,115 +1268,98 @@ function drawStartScreen() {
   });
   ctx.globalAlpha = 1;
 
-  // ── Title panel ──
-  const titlePanelGrad = ctx.createLinearGradient(140, 18, 660, 18);
-  titlePanelGrad.addColorStop(0, 'rgba(10,30,70,0)');
-  titlePanelGrad.addColorStop(0.2, 'rgba(10,30,70,0.85)');
-  titlePanelGrad.addColorStop(0.8, 'rgba(10,30,70,0.85)');
-  titlePanelGrad.addColorStop(1, 'rgba(10,30,70,0)');
-  ctx.fillStyle = titlePanelGrad;
-  ctx.fillRect(140, 18, 520, 95);
+  // ── Centre content column (fits in 800×400, readable on phone when scaled) ──
+  const cx = 400;
 
-  // Glow under title text
-  ctx.shadowColor = '#1e88e5'; ctx.shadowBlur = 22;
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 15px Georgia,serif';
+  // Title — stacked, large, gradient
   ctx.textAlign = 'center';
-  ctx.fillText('HOW I MET YOUR MOTHER', 400, 38);
-  ctx.shadowBlur = 0;
+  ctx.font = 'bold 13px Georgia,serif';
+  ctx.fillStyle = '#90CAF9';
+  ctx.letterSpacing = '3px';
+  ctx.fillText('✦  H O W  I  M E T  Y O U R  M O T H E R  ✦', cx, 28);
+  ctx.letterSpacing = '0px';
 
-  // Main title — two-line, big
-  ctx.font = 'bold 44px Georgia,serif';
-  // Shadow layer
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.fillText('How I Met', 402, 70);
-  ctx.fillText('Your Mother', 402, 108);
-  // Blue gradient fill
-  const titleGrad = ctx.createLinearGradient(200, 30, 600, 110);
+  ctx.font = 'bold 48px Georgia,serif';
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.fillText('Who is she?', cx + 2, 77);
+  const titleGrad = ctx.createLinearGradient(180, 40, 620, 80);
   titleGrad.addColorStop(0, '#64B5F6');
-  titleGrad.addColorStop(0.45, '#FFFFFF');
+  titleGrad.addColorStop(0.5, '#ffffff');
   titleGrad.addColorStop(1, '#FDD835');
   ctx.fillStyle = titleGrad;
-  ctx.fillText('How I Met', 400, 68);
-  ctx.fillText('Your Mother', 400, 106);
-
-  // ── Subtitle tagline ──
-  ctx.fillStyle = '#90CAF9';
-  ctx.font = 'italic 13px Georgia,serif';
-  ctx.fillText('The Endless Runner', 400, 126);
-
-  // ── High score bar ──
-  ctx.fillStyle = 'rgba(255,215,0,0.12)';
-  ctx.beginPath(); ctx.roundRect(250, 133, 300, 24, 8); ctx.fill();
-  ctx.fillStyle = '#FFD700';
-  ctx.font = 'bold 12px monospace';
-  ctx.fillText(`★  High Score: ${getHighScore()}   |   Best Level: ${getHighLevel()}  ★`, 400, 149);
-
-  // ── Ted character + card ──
-  // Card glow
-  ctx.shadowColor = '#FDD835'; ctx.shadowBlur = 18;
-  ctx.fillStyle = 'rgba(13,32,64,0.82)';
-  ctx.strokeStyle = '#FDD835';
-  ctx.lineWidth = 2.5;
-  ctx.beginPath(); ctx.roundRect(290, 162, 220, 108, 16); ctx.fill(); ctx.stroke();
+  ctx.shadowColor = '#1e88e5'; ctx.shadowBlur = 16;
+  ctx.fillText('Who is she?', cx, 75);
   ctx.shadowBlur = 0;
 
-  // Ted drawn inside card, left side
-  ctx.save(); ctx.scale(0.72, 0.72); ctx.translate(425, 222);
+  // High score pill
+  ctx.fillStyle = 'rgba(255,215,0,0.1)';
+  ctx.beginPath(); ctx.roundRect(cx - 150, 86, 300, 22, 11); ctx.fill();
+  ctx.fillStyle = '#FFD700'; ctx.font = 'bold 11px monospace';
+  ctx.fillText(`★  Best Score: ${getHighScore()}   |   Level ${getHighLevel()}  ★`, cx, 101);
+
+  // ── Ted figure — centred, standing tall ──
+  ctx.save(); ctx.scale(0.9, 0.9); ctx.translate(cx / 0.9, 115 / 0.9);
   drawCartoonChar(0, 0, true, false);
   ctx.restore();
 
-  // Card text right side
-  ctx.fillStyle = '#FDD835';
-  ctx.font = 'bold 15px Georgia,serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Play as Ted', 400, 192);
-
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '11px monospace';
-  ctx.fillText('Collect to choose your ending:', 400, 212);
-
-  // Horn row
-  ctx.textAlign = 'left';
-  ctx.fillStyle = '#64B5F6';
-  ctx.font = 'bold 11px monospace';
-  ctx.fillText('🎺  Horns  →  Robin', 306, 232);
-  // Umbrella row
-  ctx.fillStyle = '#FDD835';
-  ctx.fillText('☂  Umbrellas  →  Tracy', 306, 250);
-
-  // ── Start button ──
-  const pulse = 0.85 + 0.15 * Math.sin(frameCount * 0.08);
-  const btnGrad = ctx.createLinearGradient(310, 278, 490, 308);
-  btnGrad.addColorStop(0, `rgba(21,101,192,${0.9*pulse})`);
-  btnGrad.addColorStop(1, `rgba(30,136,229,${0.9*pulse})`);
-  ctx.fillStyle = btnGrad;
-  ctx.strokeStyle = `rgba(255,255,255,${0.7*pulse})`;
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.roundRect(310, 278, 180, 36, 18); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 16px Georgia,serif';
-  ctx.textAlign = 'center';
-  ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 4;
-  ctx.fillText('▶  Press SPACE', 400, 301);
+  // ── Riddle card ──
+  ctx.shadowColor = '#FDD835'; ctx.shadowBlur = 14;
+  ctx.fillStyle = 'rgba(8, 20, 50, 0.88)';
+  ctx.strokeStyle = 'rgba(253,216,53,0.7)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(cx - 195, 162, 390, 112, 14); ctx.fill(); ctx.stroke();
   ctx.shadowBlur = 0;
 
-  // ── Controls strip ──
-  ctx.fillStyle = 'rgba(0,0,0,0.45)';
-  ctx.fillRect(0, 325, 800, 75);
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(0,325); ctx.lineTo(800,325); ctx.stroke();
+  // Riddle lines — italic serif, mysterious
+  const riddle = [
+    'One was stolen on a cold first night,',
+    'One kept her dry in fading light.',
+    'Chase what calls you — blue or gold —',
+    'and fate will finish the story untold.',
+  ];
+  ctx.font = 'italic 13px Georgia,serif';
+  ctx.textAlign = 'center';
+  riddle.forEach((line, i) => {
+    const shimmer = 0.75 + 0.25 * Math.sin(frameCount * 0.04 + i * 0.9);
+    ctx.fillStyle = i < 2 ? `rgba(144,202,249,${shimmer})` : `rgba(253,216,53,${shimmer})`;
+    ctx.fillText(line, cx, 183 + i * 22);
+  });
 
-  ctx.fillStyle = '#aaaaaa';
-  ctx.font = '12px monospace';
-  ctx.fillText('SPACE = Jump   |   SPACE×2 = Super Jump   |   ↓ = Duck   |   F / → = Sword Attack', 400, 345);
+  // Small collectible icons flanking riddle as hints (no labels)
+  ctx.save(); ctx.scale(0.5, 0.5); ctx.translate((cx - 185) / 0.5, 230 / 0.5);
+  drawBlueHorn(0, 0);
+  ctx.restore();
+  ctx.save(); ctx.scale(0.5, 0.5); ctx.translate((cx + 155) / 0.5, 225 / 0.5);
+  drawYellowUmbrella(0, 0);
+  ctx.restore();
 
-  ctx.fillStyle = '#64B5F6';
-  ctx.font = 'bold 12px monospace';
-  ctx.fillText('🎺 Collect Blue Horns to meet Robin', 400, 365);
-  ctx.fillStyle = '#FDD835';
-  ctx.fillText('☂ Collect Yellow Umbrellas to meet Tracy', 400, 385);
+  // ── Pulsing tap/space button ──
+  const pulse = 0.82 + 0.18 * Math.sin(frameCount * 0.09);
+  ctx.shadowColor = `rgba(100,181,246,${pulse})`;
+  ctx.shadowBlur = 18 * pulse;
+  const btnGrad = ctx.createLinearGradient(cx - 110, 285, cx + 110, 315);
+  btnGrad.addColorStop(0, `rgba(13,71,161,${pulse})`);
+  btnGrad.addColorStop(1, `rgba(30,136,229,${pulse})`);
+  ctx.fillStyle = btnGrad;
+  ctx.strokeStyle = `rgba(255,255,255,${0.6 * pulse})`;
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(cx - 115, 283, 230, 44, 22); ctx.fill(); ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 17px Georgia,serif'; ctx.textAlign = 'center';
+  ctx.fillText('▶  Tap to Begin', cx, 311);
+
+  // ── Controls footer ──
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(0, 338, 800, 62);
+  ctx.strokeStyle = 'rgba(100,181,246,0.15)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, 338); ctx.lineTo(800, 338); ctx.stroke();
+
+  ctx.fillStyle = '#607D8B'; ctx.font = '11px monospace'; ctx.textAlign = 'center';
+  ctx.fillText('Jump  ·  Double-Jump  ·  Duck  ·  Sword Attack', cx, 357);
+  ctx.fillStyle = '#546E7A'; ctx.font = '11px monospace';
+  ctx.fillText('Collect blue  ·  Collect gold  ·  Defeat bosses  ·  Discover the truth', cx, 376);
+  ctx.fillStyle = '#455A64'; ctx.font = '10px monospace';
+  ctx.fillText('SPACE / tap  ·  ↓ duck  ·  F or → or tap-right = attack', cx, 393);
 }
 
 function drawGameOver() {
