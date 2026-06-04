@@ -590,116 +590,118 @@ function drawTracy(cx, baseY) {
   const headR  = 13;
   const headCY = baseY + headR;
   const bodyY  = headCY + headR - 2;
-  const bodyH  = 22;
-  const legY   = bodyY + bodyH;
+  const bodyH  = 20;
+  const skirtY = bodyY + bodyH;
   const skin   = '#FACBA0';
   const skinDk = '#E8A87C';
 
-  // ── Dress — yellow A-line, flares wide at hem ──
-  // Skirt flare (drawn first so legs show underneath)
-  ctx.fillStyle = '#F9A825';
-  ctx.beginPath();
-  ctx.moveTo(cx - 14, legY);
-  ctx.quadraticCurveTo(cx - 26, legY + 28, cx - 22, legY + 36);
-  ctx.lineTo(cx + 22, legY + 36);
-  ctx.quadraticCurveTo(cx + 26, legY + 28, cx + 14, legY);
-  ctx.closePath(); ctx.fill();
-  // Skirt highlight
-  ctx.fillStyle = '#FDD835';
-  ctx.beginPath();
-  ctx.moveTo(cx - 4, legY);
-  ctx.quadraticCurveTo(cx - 8, legY + 18, cx - 6, legY + 34);
-  ctx.lineTo(cx + 2, legY + 34);
-  ctx.quadraticCurveTo(cx + 4, legY + 18, cx + 4, legY);
-  ctx.closePath(); ctx.fill();
-  // Skirt fold shadow
-  ctx.fillStyle = '#F57F17';
-  ctx.beginPath();
-  ctx.moveTo(cx + 8, legY);
-  ctx.quadraticCurveTo(cx + 20, legY + 18, cx + 20, legY + 36);
-  ctx.lineTo(cx + 22, legY + 36);
-  ctx.quadraticCurveTo(cx + 26, legY + 28, cx + 14, legY);
-  ctx.closePath(); ctx.fill();
-  // Small feet peeking out
+  // Bare legs peeking under short skirt
+  ctx.fillStyle = skin;
+  ctx.beginPath(); ctx.roundRect(cx - 9, skirtY + 14, 7, 10, [0,0,3,3]); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(cx + 2, skirtY + 14, 7, 10, [0,0,3,3]); ctx.fill();
+  ctx.fillStyle = '#C62828';
+  ctx.beginPath(); ctx.ellipse(cx - 5.5, skirtY + 24, 7, 4, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 5.5, skirtY + 24, 7, 4, 0, 0, Math.PI*2); ctx.fill();
   ctx.fillStyle = '#111';
-  ctx.beginPath(); ctx.ellipse(cx - 8, legY + 36, 7, 3, 0, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 8, legY + 36, 7, 3, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(cx - 9, skirtY + 20, 7, 3, 1); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(cx + 2, skirtY + 20, 7, 3, 1); ctx.fill();
 
-  // ── Bodice — yellow, fitted ──
-  ctx.fillStyle = '#FBC02D';
-  ctx.beginPath(); ctx.roundRect(cx - 13, bodyY, 26, bodyH, [3,3,0,0]); ctx.fill();
-  // Neckline detail
+  // Short A-line skirt
+  ctx.fillStyle = '#FFCA28';
+  ctx.beginPath();
+  ctx.moveTo(cx - 13, skirtY);
+  ctx.quadraticCurveTo(cx - 20, skirtY + 8, cx - 18, skirtY + 18);
+  ctx.lineTo(cx + 18, skirtY + 18);
+  ctx.quadraticCurveTo(cx + 20, skirtY + 8, cx + 13, skirtY);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#FFE57F';
+  ctx.beginPath();
+  ctx.moveTo(cx - 3, skirtY);
+  ctx.quadraticCurveTo(cx - 4, skirtY + 9, cx - 3, skirtY + 17);
+  ctx.lineTo(cx + 3, skirtY + 17);
+  ctx.quadraticCurveTo(cx + 4, skirtY + 9, cx + 3, skirtY);
+  ctx.closePath(); ctx.fill();
   ctx.fillStyle = '#F9A825';
-  ctx.beginPath(); ctx.ellipse(cx, bodyY + 2, 7, 4, 0, Math.PI, Math.PI*2); ctx.fill();
-  // Belt
-  ctx.fillStyle = '#E65100';
-  ctx.beginPath(); ctx.roundRect(cx - 13, bodyY + bodyH - 6, 26, 5, 2); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(cx + 7, skirtY);
+  ctx.quadraticCurveTo(cx + 18, skirtY + 8, cx + 18, skirtY + 18);
+  ctx.lineTo(cx + 13, skirtY + 18);
+  ctx.quadraticCurveTo(cx + 12, skirtY + 9, cx + 7, skirtY);
+  ctx.closePath(); ctx.fill();
 
-  // ── Head ──
+  // Bodice with cap sleeves
+  ctx.fillStyle = '#FFB300';
+  ctx.beginPath(); ctx.roundRect(cx - 12, bodyY, 24, bodyH, [4,4,0,0]); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx - 14, bodyY + 4, 5, 4, -0.3, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 14, bodyY + 4, 5, 4,  0.3, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FFD54F';
+  ctx.beginPath(); ctx.roundRect(cx - 6, bodyY + 2, 12, bodyH - 5, 3); ctx.fill();
+  ctx.fillStyle = '#E65100';
+  ctx.beginPath(); ctx.arc(cx - 4, bodyY + 3, 3, 0.5, Math.PI - 0.5); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 4, bodyY + 3, 3, 0.5 + Math.PI, Math.PI*2 - 0.5); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx, bodyY + 3, 2, 0, Math.PI*2); ctx.fill();
+
+  // Ponytail behind head
+  const hc = '#7B3F00', hl = '#B5651D';
+  ctx.fillStyle = hc;
+  ctx.beginPath();
+  ctx.moveTo(cx + headR - 2, headCY - 4);
+  ctx.bezierCurveTo(cx + headR + 8, headCY, cx + headR + 10, headCY + 10, cx + headR + 6, headCY + 18);
+  ctx.bezierCurveTo(cx + headR + 2, headCY + 22, cx + headR - 3, headCY + 16, cx + headR, headCY + 8);
+  ctx.bezierCurveTo(cx + headR + 4, headCY + 4, cx + headR + 2, headCY - 2, cx + headR - 2, headCY - 4);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#E65100';
+  ctx.beginPath(); ctx.arc(cx + headR + 2, headCY + 2, 3, 0, Math.PI*2); ctx.fill();
+
   // Ears
   ctx.fillStyle = skinDk;
   ctx.beginPath(); ctx.ellipse(cx - headR, headCY, 4, 5, 0, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.ellipse(cx + headR, headCY, 4, 5, 0, 0, Math.PI*2); ctx.fill();
-  // Face — soft oval
+
+  // Face
   ctx.fillStyle = skin;
-  ctx.beginPath(); ctx.ellipse(cx, headCY + 1, headR - 1, headR + 1, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx, headCY, headR, 0, Math.PI*2); ctx.fill();
 
-  // ── Hair — chestnut, wavy, side-parted ──
-  const hc = '#8B4513';
-  const hh = '#C1733A'; // highlight
-  // Back volume (drawn behind face in places)
+  // Hair cap
   ctx.fillStyle = hc;
-  ctx.beginPath(); ctx.ellipse(cx + 3, headCY, headR + 3, headR + 4, 0.2, Math.PI*0.9, Math.PI*2.1); ctx.fill();
-  // Top cap
-  ctx.beginPath(); ctx.ellipse(cx, headCY - 3, headR, 10, 0, Math.PI, Math.PI*2); ctx.fill();
-  // Left wave sweeping down past cheek
-  ctx.beginPath();
-  ctx.moveTo(cx - headR, headCY - 4);
-  ctx.bezierCurveTo(cx - headR - 6, headCY + 4, cx - headR - 4, headCY + 14, cx - headR, headCY + 18);
-  ctx.bezierCurveTo(cx - headR + 4, headCY + 20, cx - 8, headCY + 12, cx - headR, headCY + 4);
-  ctx.closePath(); ctx.fill();
-  // Hair highlight wave
-  ctx.fillStyle = hh;
-  ctx.beginPath(); ctx.ellipse(cx - 3, headCY - 9, 7, 4, -0.3, Math.PI*1.1, Math.PI*1.9); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx, headCY - 2, headR, 9, 0, Math.PI, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx - headR + 2, headCY - 2, 4, 7, -0.4, Math.PI*1.1, Math.PI*1.9); ctx.fill();
+  ctx.fillStyle = hl;
+  ctx.beginPath(); ctx.ellipse(cx - 2, headCY - 10, 6, 3, -0.2, Math.PI*1.1, Math.PI*1.9); ctx.fill();
 
-  // ── Eyebrows — soft arched ──
-  ctx.strokeStyle = '#5C2E00'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.arc(cx - 5, headCY - 3, 4, Math.PI + 0.4, Math.PI*2 - 0.4); ctx.stroke();
-  ctx.beginPath(); ctx.arc(cx + 5, headCY - 3, 4, Math.PI + 0.4, Math.PI*2 - 0.4); ctx.stroke();
+  // Eyebrows
+  ctx.strokeStyle = '#5C2E00'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(cx - 5, headCY - 3, 3.8, Math.PI + 0.45, Math.PI*2 - 0.45); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx + 5, headCY - 3, 3.8, Math.PI + 0.45, Math.PI*2 - 0.45); ctx.stroke();
 
-  // ── Eyes — warm hazel ──
+  // Big sparkly eyes
   ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.ellipse(cx - 5, headCY + 2, 4.5, 3.5, 0, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 5, headCY + 2, 4.5, 3.5, 0, 0, Math.PI*2); ctx.fill();
-  // Iris — hazel green-brown
-  ctx.fillStyle = '#7B5E2A';
-  ctx.beginPath(); ctx.arc(cx - 5, headCY + 2, 2.5, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + 5, headCY + 2, 2.5, 0, Math.PI*2); ctx.fill();
-  // Green fleck
-  ctx.fillStyle = '#5D8A3C';
-  ctx.beginPath(); ctx.arc(cx - 4.5, headCY + 1.5, 1, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + 5.5, headCY + 1.5, 1, 0, Math.PI*2); ctx.fill();
-  // Pupil
+  ctx.beginPath(); ctx.ellipse(cx - 5, headCY + 2, 4.5, 4, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 5, headCY + 2, 4.5, 4, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#A0522D';
+  ctx.beginPath(); ctx.arc(cx - 5, headCY + 2.5, 2.8, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 5, headCY + 2.5, 2.8, 0, Math.PI*2); ctx.fill();
   ctx.fillStyle = '#111';
-  ctx.beginPath(); ctx.arc(cx - 5, headCY + 2, 1.2, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + 5, headCY + 2, 1.2, 0, Math.PI*2); ctx.fill();
-  // Catchlight
+  ctx.beginPath(); ctx.arc(cx - 5, headCY + 2.5, 1.4, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 5, headCY + 2.5, 1.4, 0, Math.PI*2); ctx.fill();
   ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.arc(cx - 4, headCY + 1, 0.6, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + 6, headCY + 1, 0.6, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx - 4, headCY + 1.5, 0.9, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx - 6.2, headCY + 3.2, 0.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 6, headCY + 1.5, 0.9, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 3.8, headCY + 3.2, 0.5, 0, Math.PI*2); ctx.fill();
 
-  // Rosy cheeks
-  ctx.fillStyle = 'rgba(230,110,80,0.2)';
-  ctx.beginPath(); ctx.ellipse(cx - 9, headCY + 6, 5, 3, 0, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 9, headCY + 6, 5, 3, 0, 0, Math.PI*2); ctx.fill();
+  // Big rosy cheeks
+  ctx.fillStyle = 'rgba(255,120,100,0.28)';
+  ctx.beginPath(); ctx.ellipse(cx - 9, headCY + 6, 5.5, 3.5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 9, headCY + 6, 5.5, 3.5, 0, 0, Math.PI*2); ctx.fill();
 
-  // ── Warm smile — wider and softer than Robin's ──
-  ctx.strokeStyle = '#b5673a'; ctx.lineWidth = 1.6;
-  ctx.beginPath(); ctx.arc(cx, headCY + 6, 5.5, 0.1, Math.PI - 0.1); ctx.stroke();
-  // Smile dimple dots
-  ctx.fillStyle = 'rgba(180,90,50,0.4)';
-  ctx.beginPath(); ctx.arc(cx - 5.5, headCY + 7, 1, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + 5.5, headCY + 7, 1, 0, Math.PI*2); ctx.fill();
+  // Big warm smile with teeth
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(cx, headCY + 7, 4.5, 0, Math.PI); ctx.fill();
+  ctx.strokeStyle = '#b5673a'; ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.arc(cx, headCY + 7, 4.5, 0, Math.PI); ctx.stroke();
+  ctx.strokeStyle = '#ddd'; ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.moveTo(cx, headCY + 7); ctx.lineTo(cx, headCY + 11.5); ctx.stroke();
 
   ctx.restore();
 }
