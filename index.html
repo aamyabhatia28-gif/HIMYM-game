@@ -163,8 +163,8 @@ const OBSTACLE_TYPES = [
   { name: 'Pineapple',     color: '#fdd835', points: -15, w: 28, h: 50, levels: [1] },
   { name: 'Slutty Pumpkin',color: '#ff6b00', points: -20, w: 38, h: 48, levels: [2] },
   { name: 'Red Boots',     color: '#c62828', points: -25, w: 45, h: 38, levels: [2] },
-  { name: 'Red Boots',     color: '#c62828', points: -25, w: 45, h: 38, levels: [3] },
-  { name: 'Goat',          color: '#9e9e9e', points: -30, w: 40, h: 50, levels: [3] },
+  { name: 'Ducky Tie',          color: '#f9d71c', points: -20, w: 36, h: 52, levels: [3] },
+  { name: "Marshall's Sandwich", color: '#c8a96e', points: -25, w: 50, h: 42, levels: [3] },
   { name: 'Slutty Pumpkin',color: '#ff6b00', points: -20, w: 38, h: 48, levels: [4] },
   { name: 'Red Boots',     color: '#c62828', points: -25, w: 45, h: 38, levels: [4] },
   { name: 'Red Boots',     color: '#c62828', points: -25, w: 45, h: 38, levels: [5] },
@@ -1113,6 +1113,81 @@ function drawObstacle(obs) {
     ctx.font = 'bold 13px serif';
     ctx.textAlign = 'center';
     ctx.fillText('★', 4, -4);
+
+  } else if (obs.name === 'Ducky Tie') {
+    // ── Ducky Tie ──
+    // Tie knot
+    ctx.fillStyle = '#F9D71C';
+    ctx.beginPath(); ctx.roundRect(-5, -22, 10, 9, 3); ctx.fill();
+    ctx.fillStyle = '#E6C200';
+    ctx.beginPath(); ctx.moveTo(0, -13);
+    ctx.lineTo(-9, 8); ctx.lineTo(0, 20); ctx.lineTo(9, 8);
+    ctx.closePath(); ctx.fill();
+    // Tie highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.beginPath(); ctx.moveTo(-2, -12); ctx.lineTo(-5, 4); ctx.lineTo(0, 4); ctx.lineTo(2, -12); ctx.closePath(); ctx.fill();
+    // Duck face on tie
+    ctx.fillStyle = '#FF8F00';
+    ctx.beginPath(); ctx.ellipse(0, -1, 7, 6, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FFF9C4';
+    ctx.beginPath(); ctx.ellipse(0, -2, 5, 4, 0, 0, Math.PI*2); ctx.fill();
+    // Duck eyes
+    ctx.fillStyle = '#111';
+    ctx.beginPath(); ctx.arc(-2, -4, 1.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(2, -4, 1.2, 0, Math.PI*2); ctx.fill();
+    // Duck beak
+    ctx.fillStyle = '#FF6F00';
+    ctx.beginPath(); ctx.ellipse(0, -1, 3, 1.5, 0, 0, Math.PI*2); ctx.fill();
+    // Wing bumps
+    ctx.fillStyle = '#FFB300';
+    ctx.beginPath(); ctx.ellipse(-5, 1, 3, 2, -0.4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(5, 1, 3, 2,  0.4, 0, Math.PI*2); ctx.fill();
+    // Tie bottom point shadow
+    ctx.fillStyle = '#C9A800';
+    ctx.beginPath(); ctx.moveTo(-3, 12); ctx.lineTo(0, 20); ctx.lineTo(3, 12); ctx.closePath(); ctx.fill();
+
+  } else if (obs.name === "Marshall's Sandwich") {
+    // ── Marshall's Legendary Sandwich ──
+    // Bottom bun
+    ctx.fillStyle = '#C8860A';
+    ctx.beginPath(); ctx.roundRect(-22, 8, 44, 12, [0,0,8,8]); ctx.fill();
+    ctx.fillStyle = '#E8A020';
+    ctx.beginPath(); ctx.roundRect(-20, 8, 40, 6, [0,0,4,4]); ctx.fill();
+    // Lettuce frills
+    ctx.fillStyle = '#4CAF50';
+    for (let lx = -20; lx <= 16; lx += 8) {
+      ctx.beginPath(); ctx.ellipse(lx + 4, 7, 6, 4, Math.sin(lx)*0.3, 0, Math.PI*2); ctx.fill();
+    }
+    // Tomato slices
+    ctx.fillStyle = '#E53935';
+    ctx.beginPath(); ctx.roundRect(-18, -1, 36, 8, 3); ctx.fill();
+    ctx.fillStyle = '#EF9A9A';
+    ctx.beginPath(); ctx.roundRect(-14, 0, 8, 6, 2); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(2, 0, 8, 6, 2); ctx.fill();
+    // Cheese ooze
+    ctx.fillStyle = '#FDD835';
+    ctx.beginPath(); ctx.roundRect(-20, -9, 40, 11, 3); ctx.fill();
+    ctx.fillStyle = '#F9A825';
+    ctx.beginPath(); ctx.moveTo(-16,-9); ctx.lineTo(-20,-14); ctx.lineTo(-12,-9); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(10,-9); ctx.lineTo(14,-14); ctx.lineTo(18,-9); ctx.fill();
+    // Patty
+    ctx.fillStyle = '#6D4C41';
+    ctx.beginPath(); ctx.roundRect(-19, -17, 38, 10, 4); ctx.fill();
+    ctx.fillStyle = '#795548';
+    ctx.beginPath(); ctx.roundRect(-16, -16, 32, 5, 3); ctx.fill();
+    // Top bun — big and domed
+    ctx.fillStyle = '#C8860A';
+    ctx.beginPath(); ctx.ellipse(0, -22, 21, 14, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#E8A020';
+    ctx.beginPath(); ctx.ellipse(-3, -26, 12, 7, -0.2, 0, Math.PI*2); ctx.fill();
+    // Sesame seeds
+    ctx.fillStyle = '#FFF9C4';
+    [[-8,-24],[0,-28],[8,-24],[4,-21],[-4,-21]].forEach(([sx,sy]) => {
+      ctx.beginPath(); ctx.ellipse(sx, sy, 2.5, 1.2, Math.random(), 0, Math.PI*2); ctx.fill();
+    });
+    // "LEGENDARY" label
+    ctx.fillStyle = '#FFD700'; ctx.font = 'bold 6px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('LEGENDARY', 0, 3);
   }
 
   ctx.restore();
