@@ -73,6 +73,7 @@ let selectedChar = 'ted';
 let score = 0;
 let lives = 3;
 let hornCount = 0;
+let umbrellaCount = 0;
 let currentLevel = 1;
 let invincible = false;
 let invincibleTimer = 0;
@@ -210,21 +211,25 @@ canvas.addEventListener('touchend', e => {
   e.preventDefault();
 }, { passive: false });
 
+let swordSwingTimer = 0; // >0 = sword visible, counts down
+
 function throwHorn() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const now = performance.now();
   if (now - throwCooldown < THROW_COOLDOWN_MS) return;
   throwCooldown = now;
-  // Spawn well ahead of player so it doesn't instantly hit anything near them
+  // Sword slash — short fast projectile
   playerProjectiles.push({
-    x: player.x + player.w + 20,
-    y: player.y - 10,
-    vx: 9,
-    vy: -3,   // arcs upward then falls, making it easier to aim
-    w: 36, h: 28
+    x: player.x + player.w,
+    y: player.y + 4,
+    vx: 14,
+    vy: 0,
+    w: 40, h: 12,
+    isSword: true
   });
-  playSound(700, 'sine', 0.1, 0.12);
-  playSound(1000, 'sine', 0.08, 0.08);
+  swordSwingTimer = 18; // show swing animation for ~18 frames
+  playSound(400, 'sawtooth', 0.15, 0.08);
+  playSound(600, 'sawtooth', 0.1, 0.06);
 }
 
 function handleJump(isDouble) {
@@ -254,9 +259,7 @@ canvas.addEventListener('click', e => {
     const scaleX = 800 / rect.width;
     const mx = (e.clientX - rect.left) * scaleX;
     const my = (e.clientY - rect.top) * (400 / rect.height);
-    // Ted button ~300,270 Robin ~500,270
-    if (mx > 260 && mx < 380 && my > 240 && my < 300) selectedChar = 'ted';
-    if (mx > 420 && mx < 540 && my > 240 && my < 300) selectedChar = 'robin';
+    // Ted is the only character
   }
 });
 
@@ -265,6 +268,7 @@ function startGame() {
   score = 0;
   lives = 3;
   hornCount = 0;
+  umbrellaCount = 0;
   currentLevel = 1;
   gameSpeed = 2;
   obstacles = [];
@@ -273,6 +277,7 @@ function startGame() {
   bossProjectiles = [];
   playerProjectiles = [];
   throwCooldown = 0;
+  swordSwingTimer = 0;
   boss = null;
   bossPhase = false;
   invincible = false;
@@ -640,6 +645,38 @@ function drawBlueHorn(x, y) {
   ctx.font = 'bold 10px serif'; ctx.textAlign = 'center';
   ctx.fillText('✦', 14, -2);
 
+  ctx.restore();
+}
+
+function drawYellowUmbrella(x, y) {
+  ctx.save();
+  ctx.translate(x, y);
+  // Canopy — semicircle with scalloped edge
+  const canopyGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 22);
+  canopyGrad.addColorStop(0, '#FFF176');
+  canopyGrad.addColorStop(1, '#F9A825');
+  ctx.fillStyle = canopyGrad;
+  ctx.beginPath();
+  ctx.arc(0, 0, 22, Math.PI, 0);
+  ctx.closePath();
+  ctx.fill();
+  // Scallop bumps along bottom edge
+  ctx.fillStyle = '#F9A825';
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath(); ctx.arc(i * 10, 0, 6, 0, Math.PI); ctx.fill();
+  }
+  // Canopy ribs
+  ctx.strokeStyle = 'rgba(255,200,0,0.5)'; ctx.lineWidth = 1;
+  [-15, -8, 0, 8, 15].forEach(rx => {
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(rx, 22); ctx.stroke();
+  });
+  // Gloss highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.beginPath(); ctx.ellipse(-6, -8, 8, 5, -0.3, 0, Math.PI*2); ctx.fill();
+  // Handle — vertical stick + J-curve
+  ctx.strokeStyle = '#795548'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 28); ctx.stroke();
+  ctx.beginPath(); ctx.arc(5, 28, 5, Math.PI, Math.PI * 1.5); ctx.stroke();
   ctx.restore();
 }
 
@@ -1099,10 +1136,12 @@ function spawnObstacle() {
 
 function spawnCollectible() {
   const yPos = GROUND - 20 - Math.random() * 100;
+  const type = Math.random() < 0.5 ? 'horn' : 'umbrella';
   collectibles.push({
     x: 850, y: yPos,
     w: 32, h: 40,
-    speed: gameSpeed
+    speed: gameSpeed,
+    type
   });
 }
 
@@ -1150,11 +1189,13 @@ function drawHUD() {
     ctx.font = '18px serif';
     ctx.fillText('♥', 780 - i * 22, 22);
   }
-  // Horn count
-  ctx.fillStyle = '#1e88e5';
+  // Collectible counts
   ctx.font = 'bold 12px monospace';
   ctx.textAlign = 'left';
+  ctx.fillStyle = '#1e88e5';
   ctx.fillText(`🎺 ${hornCount}`, 10, 50);
+  ctx.fillStyle = '#FDD835';
+  ctx.fillText(`☂ ${umbrellaCount}`, 70, 50);
 }
 
 function drawStartScreen() {
@@ -1189,47 +1230,28 @@ function drawStartScreen() {
   ctx.font = 'bold 14px monospace';
   ctx.fillText(`High Score: ${getHighScore()}  |  Best Level: ${getHighLevel()}`, 400, 165);
 
-  // Character select
-  ctx.fillStyle = '#e0e0e0';
-  ctx.font = 'bold 16px monospace';
-  ctx.fillText('Choose Your Character:', 400, 210);
-
-  // Ted button
-  const tedSel = selectedChar === 'ted';
-  ctx.fillStyle = tedSel ? 'rgba(21,101,192,0.35)' : 'rgba(21,101,192,0.12)';
-  ctx.strokeStyle = tedSel ? '#ffd700' : '#3a6fa8';
-  ctx.lineWidth = tedSel ? 3 : 1;
-  ctx.beginPath(); ctx.roundRect(258, 218, 126, 80, 12); ctx.fill(); ctx.stroke();
-  // Mini cartoon Ted
-  ctx.save(); ctx.scale(0.55, 0.55); ctx.translate(200, 340);
+  // Ted character card
+  ctx.fillStyle = 'rgba(21,101,192,0.25)';
+  ctx.strokeStyle = '#ffd700';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(312, 190, 176, 95, 14); ctx.fill(); ctx.stroke();
+  ctx.save(); ctx.scale(0.65, 0.65); ctx.translate(430, 285);
   drawCartoonChar(0, 0, true, false);
   ctx.restore();
-  ctx.fillStyle = 'white'; ctx.font = 'bold 14px monospace'; ctx.textAlign = 'center';
-  ctx.fillText('Ted', 321, 278);
-  if (tedSel) { ctx.fillStyle = '#ffd700'; ctx.font = '10px monospace'; ctx.fillText('✓ Selected', 321, 292); }
-
-  // Robin button
-  const robSel = selectedChar === 'robin';
-  ctx.fillStyle = robSel ? 'rgba(198,40,40,0.35)' : 'rgba(198,40,40,0.12)';
-  ctx.strokeStyle = robSel ? '#ffd700' : '#8b2020';
-  ctx.lineWidth = robSel ? 3 : 1;
-  ctx.beginPath(); ctx.roundRect(416, 218, 126, 80, 12); ctx.fill(); ctx.stroke();
-  // Mini cartoon Robin
-  ctx.save(); ctx.scale(0.55, 0.55); ctx.translate(890, 340);
-  drawCartoonChar(0, 0, false, false);
-  ctx.restore();
-  ctx.fillStyle = 'white'; ctx.font = 'bold 14px monospace'; ctx.textAlign = 'center';
-  ctx.fillText('Robin', 479, 278);
-  if (robSel) { ctx.fillStyle = '#ffd700'; ctx.font = '10px monospace'; ctx.fillText('✓ Selected', 479, 292); }
+  ctx.fillStyle = '#ffd700'; ctx.font = 'bold 15px monospace'; ctx.textAlign = 'center';
+  ctx.fillText('Play as Ted', 400, 269);
+  ctx.fillStyle = '#aaaaaa'; ctx.font = '11px monospace';
+  ctx.fillText('Collect 🎺 or ☂ — who will he meet?', 400, 286);
 
   // Instructions
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 16px monospace';
-  ctx.fillText('Press SPACE to Start', 400, 330);
+  ctx.fillText('Press SPACE to Start', 400, 318);
   ctx.fillStyle = '#aaaaaa';
   ctx.font = '12px monospace';
-  ctx.fillText('SPACE = Jump  |  SPACE×2 = Super Jump  |  ↓ = Duck', 400, 355);
-  ctx.fillText('Collect Blue Horns  |  Avoid Obstacles  |  Defeat Bosses!', 400, 375);
+  ctx.fillText('SPACE = Jump  |  SPACE×2 = Super Jump  |  ↓ = Duck', 400, 343);
+  ctx.fillText('🎺 Blue Horns → Robin  |  ☂ Umbrellas → Tracy', 400, 363);
+  ctx.fillText('Defeat the bosses to reach the ending!', 400, 381);
 }
 
 function drawGameOver() {
@@ -1253,7 +1275,7 @@ function drawGameOver() {
   }
   ctx.fillStyle = '#ffffff';
   ctx.font = '16px monospace';
-  ctx.fillText(`Horns Collected: ${hornCount}  |  Level: ${LEVELS[currentLevel].name}`, 400, 278);
+  ctx.fillText(`🎺 ${hornCount}  |  ☂ ${umbrellaCount}  |  Level: ${LEVELS[currentLevel].name}`, 400, 278);
   // Play again button
   ctx.fillStyle = '#1565c0';
   ctx.beginPath();
@@ -1326,17 +1348,25 @@ function drawEnding() {
   for (let i=0; i<800; i+=60) { ctx.fillStyle='rgba(255,220,50,0.3)'; ctx.fillRect(i,360,40,4); }
 
   const t = endingTimer;
-  const partnerName = selectedChar === 'ted' ? 'Robin' : 'Ted';
-  const playerName  = selectedChar === 'ted' ? 'Ted'   : 'Robin';
+  // Who Ted meets depends on what he collected more of
+  const meetsTracy = umbrellaCount >= hornCount;
+  const partnerName = meetsTracy ? 'Tracy' : 'Robin';
+  const playerName  = 'Ted';
 
-  // Player walks in from left
+  // Ted walks in from left
   const playerCX = -40 + Math.min(t / 90, 1) * 380;
-  drawCartoonChar(playerCX, 270, selectedChar === 'ted', false);
+  drawCartoonChar(playerCX, 270, true, false);
 
   // Partner walks in from right (starts at frame 60)
   if (t >= 60) {
     const partnerCX = 860 + Math.min((t - 60) / 90, 1) * (500 - 860);
-    drawCartoonChar(partnerCX, 270, selectedChar !== 'ted', false);
+    if (meetsTracy) {
+      // Tracy — yellow dress, holding yellow umbrella
+      drawYellowUmbrella(partnerCX + 10, 240);
+      drawCartoonChar(partnerCX, 270, false, false);
+    } else {
+      drawCartoonChar(partnerCX, 270, false, false);
+    }
   }
 
   // Horn floats between them (frame 150+)
@@ -1349,8 +1379,8 @@ function drawEnding() {
     ctx.beginPath(); ctx.roundRect(250, 175, 300, 60, 12); ctx.fill();
     ctx.shadowBlur = 0;
     ctx.fillStyle = '#1a1a1a'; ctx.font = 'bold 12px Georgia,serif'; ctx.textAlign = 'center';
-    const line1 = selectedChar === 'ted' ? '"Robin… I got this for you."' : '"Ted… you came for me."';
-    const line2 = selectedChar === 'ted' ? '"I searched every level for you."' : '"You searched every level for me."';
+    const line1 = meetsTracy ? '"Hi, I\'m Tracy. Nice umbrella weather."' : '"Robin… I got this for you."';
+    const line2 = meetsTracy ? '"Ted Mosby. I\'ve been looking for you."' : '"I searched every level for you."';
     ctx.fillText(line1, 400, 200); ctx.fillText(line2, 400, 220);
     ctx.fillStyle = 'rgba(255,255,255,0.95)';
     ctx.beginPath(); ctx.moveTo(370,235); ctx.lineTo(390,255); ctx.lineTo(410,235); ctx.closePath(); ctx.fill();
@@ -1366,12 +1396,15 @@ function drawEnding() {
     ctx.fillStyle = '#fdd835';
     ctx.font = 'bold 22px monospace';
     ctx.fillText(`is how ${playerName} met ${partnerName}.`, 400, 180);
-    // Blue horns
-    drawBlueHorn(280, 230);
-    drawBlueHorn(480, 230);
+    // Decorations
+    if (meetsTracy) {
+      drawYellowUmbrella(275, 240); drawYellowUmbrella(470, 240);
+    } else {
+      drawBlueHorn(280, 230); drawBlueHorn(480, 230);
+    }
     ctx.fillStyle = '#ffffff';
     ctx.font = '14px monospace';
-    ctx.fillText(`Score: ${score}  |  Horns: ${hornCount}`, 400, 300);
+    ctx.fillText(`Score: ${score}  |  🎺 ${hornCount}  |  ☂ ${umbrellaCount}`, 400, 300);
     ctx.fillStyle = '#aaaaaa';
     ctx.font = '13px monospace';
     ctx.fillText('Press SPACE to play again', 400, 340);
@@ -1490,9 +1523,14 @@ function update(dt) {
       const cbox = { x: col.x, y: col.y, w: col.w, h: col.h };
       if (checkAABB(pbox, cbox)) {
         score += 25;
-        hornCount++;
+        if (col.type === 'umbrella') {
+          umbrellaCount++;
+          spawnParticles(col.x + 16, col.y, '#FDD835', 10);
+        } else {
+          hornCount++;
+          spawnParticles(col.x + 16, col.y, '#1e88e5', 10);
+        }
         sfxCollect();
-        spawnParticles(col.x + 16, col.y, '#1e88e5', 10);
         collectibles.splice(i, 1);
         continue;
       }
@@ -1602,13 +1640,16 @@ function update(dt) {
         }
       }
 
-      // Player projectiles (thrown horns) hit boss
+      // Sword swing timer
+      if (swordSwingTimer > 0) swordSwingTimer--;
+
+      // Player sword slashes hit boss
       if (boss) {
         const bossHitBox = { x: boss.x, y: boss.y, w: boss.w, h: boss.h };
         for (let i = playerProjectiles.length - 1; i >= 0; i--) {
           if (!boss) break; // boss was killed mid-loop — stop immediately
           const pp = playerProjectiles[i];
-          pp.vy += 0.25;
+          if (!pp.isSword) pp.vy += 0.25; // only gravity on non-sword projectiles
           pp.x += pp.vx;
           pp.y += pp.vy;
           if (pp.x > 850 || pp.y > 420) { playerProjectiles.splice(i, 1); continue; }
@@ -1689,7 +1730,11 @@ function draw() {
 
   // Draw collectibles
   collectibles.forEach(col => {
-    drawBlueHorn(col.x + 16, col.y + 20);
+    if (col.type === 'umbrella') {
+      drawYellowUmbrella(col.x + 16, col.y + 10);
+    } else {
+      drawBlueHorn(col.x + 16, col.y + 20);
+    }
   });
 
   // Draw obstacles
@@ -1707,19 +1752,44 @@ function draw() {
   // Boss projectiles
   bossProjectiles.forEach(proj => drawBossProjectile(proj));
 
-  // Player thrown horns
+  // Player sword slashes
   playerProjectiles.forEach(pp => {
-    if (hornImg.complete && hornImg.naturalWidth > 0) {
-      ctx.save();
-      ctx.shadowColor = 'rgba(20,60,200,0.3)'; ctx.shadowBlur = 6;
-      ctx.drawImage(hornImg, pp.x, pp.y, pp.w, pp.h);
-      ctx.shadowBlur = 0;
-      ctx.restore();
-    } else {
-      ctx.fillStyle = '#1e88e5';
-      ctx.beginPath(); ctx.arc(pp.x + 12, pp.y + 12, 10, 0, Math.PI*2); ctx.fill();
-    }
+    ctx.save();
+    ctx.translate(pp.x + pp.w / 2, pp.y + pp.h / 2);
+    // Sword blade
+    const bladeGrad = ctx.createLinearGradient(-20, -4, 20, 4);
+    bladeGrad.addColorStop(0, '#C0C0C0');
+    bladeGrad.addColorStop(0.5, '#FFFFFF');
+    bladeGrad.addColorStop(1, '#9E9E9E');
+    ctx.fillStyle = bladeGrad;
+    ctx.beginPath(); ctx.roundRect(-20, -3, 38, 6, 2); ctx.fill();
+    // Tip
+    ctx.fillStyle = '#E0E0E0';
+    ctx.beginPath(); ctx.moveTo(18, -3); ctx.lineTo(26, 0); ctx.lineTo(18, 3); ctx.closePath(); ctx.fill();
+    // Guard
+    ctx.fillStyle = '#8D6E63';
+    ctx.beginPath(); ctx.roundRect(-22, -6, 6, 12, 2); ctx.fill();
+    // Slash trail
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(-18, -8); ctx.quadraticCurveTo(-5, 0, -18, 8); ctx.stroke();
+    ctx.restore();
   });
+  // Sword swing animation on Ted
+  if (swordSwingTimer > 0) {
+    const angle = ((18 - swordSwingTimer) / 18) * Math.PI * 0.8 - 0.4;
+    ctx.save();
+    ctx.translate(player.x + player.w + 6, player.y + 14);
+    ctx.rotate(angle);
+    const sg = ctx.createLinearGradient(0, -2, 28, 2);
+    sg.addColorStop(0, '#BDBDBD'); sg.addColorStop(0.5, '#FFFFFF'); sg.addColorStop(1, '#9E9E9E');
+    ctx.fillStyle = sg;
+    ctx.beginPath(); ctx.roundRect(0, -3, 28, 6, 2); ctx.fill();
+    ctx.fillStyle = '#E0E0E0';
+    ctx.beginPath(); ctx.moveTo(26,-3); ctx.lineTo(33,0); ctx.lineTo(26,3); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#8D6E63';
+    ctx.beginPath(); ctx.roundRect(-2, -7, 5, 14, 2); ctx.fill();
+    ctx.restore();
+  }
 
   // Draw player
   drawPlayer();
@@ -1731,7 +1801,7 @@ function draw() {
     ctx.fillStyle = '#fdd835';
     ctx.font = 'bold 13px monospace';
     ctx.textAlign = 'left';
-    ctx.fillText('[ F ] or [ → ] Throw Horn!', 18, 56);
+    ctx.fillText('[ F ] or [ → ] Sword Attack!', 18, 56);
     ctx.fillStyle = '#aaa';
     ctx.font = '11px monospace';
     ctx.fillText('Mobile: tap right side of screen', 18, 72);
