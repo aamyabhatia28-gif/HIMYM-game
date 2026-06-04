@@ -99,9 +99,11 @@ let frameCount = 0;
 
 // Level definitions
 const LEVELS = {
-  1: { name: "Apartment", scoreLimit: 500, bgColor: '#c4956a', accentColor: '#8b5e3c' },
-  2: { name: "MacLaren's Bar", scoreLimit: 1200, bgColor: '#2c1810', accentColor: '#4a2c1a' },
-  3: { name: "NYC Street", scoreLimit: Infinity, bgColor: '#87ceeb', accentColor: '#4a90d9' }
+  1: { name: "Apartment",       scoreLimit: 500,      bgColor: '#c4956a', accentColor: '#8b5e3c' },
+  2: { name: "MacLaren's Bar",  scoreLimit: 1200,     bgColor: '#2c1810', accentColor: '#4a2c1a' },
+  3: { name: "NYC Street",      scoreLimit: 2000,     bgColor: '#87ceeb', accentColor: '#4a90d9' },
+  4: { name: "Halloween Party", scoreLimit: 3000,     bgColor: '#1a0a2e', accentColor: '#6a1a8a' },
+  5: { name: "Farhampton",      scoreLimit: Infinity, bgColor: '#f4a460', accentColor: '#cd853f' }
 };
 
 // Player
@@ -133,9 +135,24 @@ function initParallax(level) {
       parallaxLayers.push({ type: 'bottle', x: 100 * i + 50, y: 60, speed: 0.2 });
     }
   } else if (level === 3) {
-    // NYC: buildings
     for (let i = 0; i < 10; i++) {
       parallaxLayers.push({ type: 'building', x: 120 * i, y: 50 + Math.random() * 100, h: 150 + Math.random() * 100, w: 60 + Math.random() * 50, speed: 0.4 + Math.random() * 0.3 });
+    }
+  } else if (level === 4) {
+    // Halloween: bats + jack-o-lanterns
+    for (let i = 0; i < 8; i++) {
+      parallaxLayers.push({ type: 'bat', x: 100 * i + 40, y: 40 + Math.random() * 80, speed: 0.5 + Math.random() * 0.4 });
+    }
+    for (let i = 0; i < 5; i++) {
+      parallaxLayers.push({ type: 'lantern', x: 160 * i + 60, y: 260, speed: 0.6 });
+    }
+  } else if (level === 5) {
+    // Farhampton: train tracks + clouds
+    for (let i = 0; i < 6; i++) {
+      parallaxLayers.push({ type: 'cloud', x: 140 * i + 20, y: 40 + Math.random() * 60, speed: 0.2 + Math.random() * 0.2 });
+    }
+    for (let i = 0; i < 12; i++) {
+      parallaxLayers.push({ type: 'tie', x: 70 * i, y: 320, speed: 0.8 });
     }
   }
 }
@@ -148,6 +165,10 @@ const OBSTACLE_TYPES = [
   { name: 'Slutty Pumpkin',color: '#ff6b00', points: -20, w: 38, h: 48, levels: [2] },
   { name: 'Red Boots',     color: '#c62828', points: -25, w: 45, h: 38, levels: [3] },
   { name: 'Goat',          color: '#9e9e9e', points: -30, w: 40, h: 50, levels: [3] },
+  { name: 'Slutty Pumpkin',color: '#ff6b00', points: -20, w: 38, h: 48, levels: [4] },
+  { name: 'Red Boots',     color: '#c62828', points: -25, w: 45, h: 38, levels: [4] },
+  { name: 'Red Boots',     color: '#c62828', points: -25, w: 45, h: 38, levels: [5] },
+  { name: 'Slutty Pumpkin',color: '#ff6b00', points: -20, w: 38, h: 48, levels: [5] },
 ];
 
 let obstacles = [];
@@ -347,15 +368,53 @@ function drawBackground(level) {
     // NYC Street
     ctx.fillStyle = '#87ceeb';
     ctx.fillRect(0, 0, 800, 260);
-    // Ground
     ctx.fillStyle = '#6b7280';
     ctx.fillRect(0, 315, 800, 85);
     ctx.fillStyle = '#9ca3af';
     ctx.fillRect(0, 312, 800, 8);
-    // Sidewalk line
     ctx.fillStyle = '#d1d5db';
     for (let i = 0; i < 800; i += 80) {
       ctx.fillRect(((i - scrollX * 0.8) % 800 + 800) % 800, 320, 40, 3);
+    }
+  } else if (level === 4) {
+    // Halloween Party — deep purple night
+    const hgrd = ctx.createLinearGradient(0, 0, 0, 320);
+    hgrd.addColorStop(0, '#0d0020'); hgrd.addColorStop(1, '#2a0a3a');
+    ctx.fillStyle = hgrd; ctx.fillRect(0, 0, 800, 320);
+    // Moon
+    ctx.fillStyle = '#FFF9C4';
+    ctx.shadowColor = '#FFF176'; ctx.shadowBlur = 30;
+    ctx.beginPath(); ctx.arc(680, 60, 38, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#1a0a2e'; ctx.beginPath(); ctx.arc(695, 52, 33, 0, Math.PI*2); ctx.fill();
+    // Stars
+    for (let i = 0; i < 50; i++) {
+      ctx.fillStyle = `rgba(255,255,200,${0.3 + 0.7*Math.abs(Math.sin(i*7+frameCount*0.02))})`;
+      ctx.fillRect((i*173)%800, (i*97)%200, 2, 2);
+    }
+    // Floor — dark wood
+    ctx.fillStyle = '#1a0a10'; ctx.fillRect(0, 315, 800, 85);
+    ctx.fillStyle = '#2d1520';
+    for (let i = 0; i < 800; i += 60) {
+      ctx.fillRect(((i - scrollX * 0.9) % 900 + 900) % 900, 320, 3, 75);
+    }
+  } else if (level === 5) {
+    // Farhampton — golden sunset
+    const sgrd = ctx.createLinearGradient(0, 0, 0, 320);
+    sgrd.addColorStop(0, '#FF6B35'); sgrd.addColorStop(0.4, '#FFB347'); sgrd.addColorStop(1, '#87CEEB');
+    ctx.fillStyle = sgrd; ctx.fillRect(0, 0, 800, 320);
+    // Sun
+    ctx.fillStyle = '#FFD700';
+    ctx.shadowColor = '#FF8C00'; ctx.shadowBlur = 40;
+    ctx.beginPath(); ctx.arc(400, 180, 45, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+    // Horizon grass strip
+    ctx.fillStyle = '#8B7355'; ctx.fillRect(0, 295, 800, 25);
+    ctx.fillStyle = '#6B5B45'; ctx.fillRect(0, 315, 800, 85);
+    // Train platform boards
+    ctx.fillStyle = '#7B6B55';
+    for (let i = 0; i < 800; i += 50) {
+      ctx.fillRect(((i - scrollX) % 900 + 900) % 900, 300, 3, 18);
     }
   }
 }
@@ -404,23 +463,63 @@ function drawParallax(level) {
       if (layer.type === 'building') {
         ctx.fillStyle = '#374151';
         ctx.fillRect(px, layer.y, layer.w, layer.h);
-        // Windows
         ctx.fillStyle = '#fbbf24';
-        for (let wy = layer.y + 10; wy < layer.y + layer.h - 10; wy += 20) {
-          for (let wx = px + 8; wx < px + layer.w - 8; wx += 16) {
-            if (Math.random() > 0.3) {
-              ctx.fillRect(wx, wy, 8, 10);
-            }
-          }
-        }
+        for (let wy = layer.y + 10; wy < layer.y + layer.h - 10; wy += 20)
+          for (let wx = px + 8; wx < px + layer.w - 8; wx += 16)
+            if (Math.random() > 0.3) ctx.fillRect(wx, wy, 8, 10);
+      }
+    } else if (level === 4) {
+      if (layer.type === 'bat') {
+        // Cute cartoon bat
+        const bx = px, by = layer.y + Math.sin(frameCount * 0.06 + layer.x) * 12;
+        ctx.fillStyle = '#3d0066';
+        // Wings
+        ctx.beginPath(); ctx.ellipse(bx - 14, by, 14, 7, -0.4, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(bx + 14, by, 14, 7,  0.4, 0, Math.PI*2); ctx.fill();
+        // Body
+        ctx.fillStyle = '#5a009a';
+        ctx.beginPath(); ctx.ellipse(bx, by, 8, 6, 0, 0, Math.PI*2); ctx.fill();
+        // Ears
+        ctx.fillStyle = '#3d0066';
+        ctx.beginPath(); ctx.moveTo(bx-5,by-6); ctx.lineTo(bx-8,by-13); ctx.lineTo(bx-2,by-6); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(bx+5,by-6); ctx.lineTo(bx+8,by-13); ctx.lineTo(bx+2,by-6); ctx.fill();
+        // Eyes
+        ctx.fillStyle = '#FF0000';
+        ctx.beginPath(); ctx.arc(bx-3,by-1,2,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(bx+3,by-1,2,0,Math.PI*2); ctx.fill();
+      } else if (layer.type === 'lantern') {
+        // Jack-o-lantern on ground
+        ctx.fillStyle = '#E65100';
+        ctx.beginPath(); ctx.ellipse(px + 18, layer.y, 18, 16, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#BF360C';
+        ctx.beginPath(); ctx.ellipse(px + 18, layer.y + 4, 12, 10, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#5D4037';
+        ctx.beginPath(); ctx.roundRect(px + 15, layer.y - 16, 6, 8, 3); ctx.fill();
+        ctx.fillStyle = '#FFD600';
+        // Triangle eyes
+        ctx.beginPath(); ctx.moveTo(px+10,layer.y-6); ctx.lineTo(px+14,layer.y-1); ctx.lineTo(px+6,layer.y-1); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(px+26,layer.y-6); ctx.lineTo(px+30,layer.y-1); ctx.lineTo(px+22,layer.y-1); ctx.fill();
+        // Smile
+        ctx.beginPath(); ctx.moveTo(px+10,layer.y+6); ctx.lineTo(px+12,layer.y+10); ctx.lineTo(px+16,layer.y+7); ctx.lineTo(px+20,layer.y+10); ctx.lineTo(px+24,layer.y+7); ctx.lineTo(px+26,layer.y+6); ctx.stroke();
+      }
+    } else if (level === 5) {
+      if (layer.type === 'cloud') {
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.beginPath(); ctx.ellipse(px+20, layer.y, 30, 16, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(px+38, layer.y+5, 22, 13, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(px+5, layer.y+6, 18, 12, 0, 0, Math.PI*2); ctx.fill();
+      } else if (layer.type === 'tie') {
+        // Rail tie (horizontal beam under tracks)
+        ctx.fillStyle = '#5C4033';
+        ctx.fillRect(px, layer.y, 45, 8);
       }
     }
   });
 }
 
 function drawGround(level) {
-  // Ground line
-  ctx.fillStyle = level === 2 ? '#3e2010' : level === 3 ? '#9ca3af' : '#8b5e3c';
+  const colors = { 1: '#8b5e3c', 2: '#3e2010', 3: '#9ca3af', 4: '#2d1520', 5: '#7B6B55' };
+  ctx.fillStyle = colors[level] || '#8b5e3c';
   ctx.fillRect(0, GROUND + 48, 800, 5);
 }
 
@@ -1284,8 +1383,10 @@ function spawnCollectible() {
 
 function spawnBoss(level) {
   const types = { 1: { type: 1, hp: 5, maxHp: 5, w: 110, h: 130, projType: 'pizza' },
-                   2: { type: 2, hp: 5, maxHp: 5, w: 70, h: 100, projType: 'pineapple' },
-                   3: { type: 3, hp: 5, maxHp: 5, w: 70, h: 110, projType: 'boot' } };
+                   2: { type: 2, hp: 5, maxHp: 5, w: 70,  h: 100, projType: 'pineapple' },
+                   3: { type: 3, hp: 6, maxHp: 6, w: 70,  h: 110, projType: 'boot' },
+                   4: { type: 2, hp: 7, maxHp: 7, w: 80,  h: 110, projType: 'pumpkin' },
+                   5: { type: 3, hp: 8, maxHp: 8, w: 75,  h: 115, projType: 'boot' } };
   const def = types[level];
   boss = {
     ...def,
@@ -1525,7 +1626,7 @@ function drawBossIntro() {
   ctx.fillStyle = '#e53935';
   ctx.font = 'bold 30px monospace';
   ctx.textAlign = 'center';
-  const bossNames = { 1: 'BOSS: The Goat!', 2: 'BOSS: Slutty Pumpkin!', 3: 'BOSS: Barney Stinson!' };
+  const bossNames = { 1: 'BOSS: The Goat!', 2: 'BOSS: Slutty Pumpkin!', 3: 'BOSS: Marshall\'s Twin!', 4: 'BOSS: The Pineapple!', 5: 'BOSS: Barney Stinson!' };
   ctx.fillText(bossNames[currentLevel] || 'BOSS!', 400, 180);
   ctx.fillStyle = 'white';
   ctx.font = '16px monospace';
@@ -1536,16 +1637,30 @@ let endingTimer = 0;
 let endingStep = 0; // 0=walking in, 1=meeting, 2=horn offered, 3=fade
 
 function transitionToNextLevel() {
-  // Every boss defeat leads to the ending cutscene
   obstacles = [];
   collectibles = [];
   bossProjectiles = [];
   playerProjectiles = [];
+  swordSwingTimer = 0;
   boss = null;
   bossPhase = false;
-  endingTimer = 0;
-  endingStep = 0;
-  state = STATES.ENDING;
+
+  if (currentLevel >= 5) {
+    // Final level cleared — go to ending
+    endingTimer = 0;
+    endingStep = 0;
+    state = STATES.ENDING;
+  } else {
+    // Advance to next level
+    currentLevel++;
+    gameSpeed = 2 + currentLevel * 0.3;
+    obstacleTimer = 1800;
+    collectibleTimer = 1500;
+    initParallax(currentLevel);
+    state = STATES.TRANSITION;
+    transitionTimer = 0;
+    transitionAlpha = 0;
+  }
 }
 
 function drawEnding() {
@@ -1769,11 +1884,8 @@ function update(dt) {
     if (frameCount % 30 === 0) score++;
 
     // Check level transitions
-    if (currentLevel === 1 && score > 500) {
-      triggerBoss();
-    } else if (currentLevel === 2 && score > 1200) {
-      triggerBoss();
-    } else if (currentLevel === 3 && score > 2000) {
+    const lvl = LEVELS[currentLevel];
+    if (lvl && score > lvl.scoreLimit) {
       triggerBoss();
     }
 
@@ -1905,6 +2017,22 @@ function update(dt) {
     }
   }
 
+  // Level transition fade
+  if (state === STATES.TRANSITION) {
+    transitionTimer += 16;
+    if (transitionTimer < 800) {
+      transitionAlpha = Math.min(transitionTimer / 400, 1);
+    } else {
+      transitionAlpha = Math.max(1 - (transitionTimer - 800) / 400, 0);
+      if (transitionAlpha <= 0) {
+        state = STATES.PLAYING;
+        transitionTimer = 0;
+        transitionAlpha = 0;
+      }
+    }
+    return;
+  }
+
   // Ending cutscene update
   if (state === STATES.ENDING) {
     endingTimer++;
@@ -1948,6 +2076,24 @@ function draw() {
 
   // Game background
   drawBackground(currentLevel);
+
+  // Level transition overlay
+  if (state === STATES.TRANSITION && transitionAlpha > 0) {
+    ctx.globalAlpha = transitionAlpha;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, 800, 400);
+    if (transitionAlpha > 0.7) {
+      ctx.globalAlpha = (transitionAlpha - 0.7) / 0.3;
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 28px Georgia,serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Level ${currentLevel}: ${LEVELS[currentLevel].name}`, 400, 195);
+      ctx.font = '16px Georgia,serif';
+      ctx.fillStyle = '#FDD835';
+      ctx.fillText('Get ready!', 400, 230);
+    }
+    ctx.globalAlpha = 1;
+  }
   drawParallax(currentLevel);
   drawGround(currentLevel);
 
