@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blue French Horn Quest</title>
+<title>How I Met Your Mother</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #1a1a2e; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; font-family: 'Courier New', monospace; }
@@ -74,6 +74,21 @@ let score = 0;
 let lives = 3;
 let hornCount = 0;
 let umbrellaCount = 0;
+
+// Falling menu decorations
+const menuItems = [];
+for (let i = 0; i < 18; i++) {
+  menuItems.push({
+    x: Math.random() * 800,
+    y: Math.random() * 400,
+    type: Math.random() < 0.5 ? 'horn' : 'umbrella',
+    speed: 0.4 + Math.random() * 0.7,
+    scale: 0.35 + Math.random() * 0.45,
+    wobble: Math.random() * Math.PI * 2,
+    wobbleSpeed: 0.01 + Math.random() * 0.02,
+    alpha: 0.18 + Math.random() * 0.35
+  });
+}
 let currentLevel = 1;
 let invincible = false;
 let invincibleTimer = 0;
@@ -1199,59 +1214,169 @@ function drawHUD() {
 }
 
 function drawStartScreen() {
-  // Background
-  ctx.fillStyle = '#0d1b2e';
+  // ── Rich gradient sky background ──
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, 400);
+  bgGrad.addColorStop(0, '#0a0f1e');
+  bgGrad.addColorStop(0.55, '#0d2040');
+  bgGrad.addColorStop(1, '#1a3a5c');
+  ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, 800, 400);
-  // Stars
-  ctx.fillStyle = 'white';
-  for (let i = 0; i < 80; i++) {
-    const sx = (i * 173) % 800;
-    const sy = (i * 97) % 300;
-    ctx.fillRect(sx, sy, 2, 2);
+
+  // City silhouette at bottom
+  ctx.fillStyle = '#0c1a30';
+  const buildings = [
+    [0,40,60,340],[60,70,50,330],[110,55,70,345],[180,80,45,320],[225,50,60,350],
+    [285,65,80,335],[365,45,55,355],[420,75,65,325],[485,55,70,345],[555,70,50,330],
+    [605,40,75,360],[680,60,55,340],[735,50,65,350]
+  ];
+  buildings.forEach(([x,h,w,y]) => {
+    ctx.fillRect(x, y, w, 400-y);
+    // Windows
+    ctx.fillStyle = 'rgba(255,240,150,0.25)';
+    for (let wy=y+8; wy<400; wy+=14) {
+      for (let wx=x+6; wx<x+w-6; wx+=10) {
+        if (Math.sin(wx*7+wy*13) > 0.2) ctx.fillRect(wx, wy, 5, 7);
+      }
+    }
+    ctx.fillStyle = '#0c1a30';
+  });
+
+  // Twinkling stars
+  for (let i = 0; i < 70; i++) {
+    const sx = (i * 173 + 11) % 800;
+    const sy = (i * 97 + 7) % 290;
+    const twinkle = 0.5 + 0.5 * Math.sin(frameCount * 0.05 + i);
+    ctx.globalAlpha = 0.4 + 0.6 * twinkle;
+    ctx.fillStyle = i % 5 === 0 ? '#FFF9C4' : '#ffffff';
+    const sz = i % 7 === 0 ? 2.5 : 1.5;
+    ctx.fillRect(sx, sy, sz, sz);
   }
-  // Blue horn decoration
-  drawBlueHorn(100, 200);
-  drawBlueHorn(680, 180);
+  ctx.globalAlpha = 1;
 
-  // Title
-  ctx.fillStyle = '#1e88e5';
-  ctx.font = 'bold 36px monospace';
+  // ── Animate & draw falling horns + umbrellas ──
+  menuItems.forEach(item => {
+    item.y += item.speed;
+    item.wobble += item.wobbleSpeed;
+    if (item.y > 420) { item.y = -40; item.x = Math.random() * 800; }
+    ctx.save();
+    ctx.globalAlpha = item.alpha;
+    ctx.translate(item.x + Math.sin(item.wobble) * 8, item.y);
+    ctx.scale(item.scale, item.scale);
+    if (item.type === 'horn') drawBlueHorn(0, 0);
+    else drawYellowUmbrella(0, 0);
+    ctx.restore();
+  });
+  ctx.globalAlpha = 1;
+
+  // ── Title panel ──
+  const titlePanelGrad = ctx.createLinearGradient(140, 18, 660, 18);
+  titlePanelGrad.addColorStop(0, 'rgba(10,30,70,0)');
+  titlePanelGrad.addColorStop(0.2, 'rgba(10,30,70,0.85)');
+  titlePanelGrad.addColorStop(0.8, 'rgba(10,30,70,0.85)');
+  titlePanelGrad.addColorStop(1, 'rgba(10,30,70,0)');
+  ctx.fillStyle = titlePanelGrad;
+  ctx.fillRect(140, 18, 520, 95);
+
+  // Glow under title text
+  ctx.shadowColor = '#1e88e5'; ctx.shadowBlur = 22;
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 15px Georgia,serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Blue French Horn', 400, 80);
-  ctx.fillStyle = '#fdd835';
-  ctx.font = 'bold 24px monospace';
-  ctx.fillText('Quest', 400, 115);
-  ctx.fillStyle = '#aaaaaa';
-  ctx.font = '13px monospace';
-  ctx.fillText('HIMYM Endless Runner', 400, 140);
+  ctx.fillText('HOW I MET YOUR MOTHER', 400, 38);
+  ctx.shadowBlur = 0;
 
-  // High score
-  ctx.fillStyle = '#ffd700';
-  ctx.font = 'bold 14px monospace';
-  ctx.fillText(`High Score: ${getHighScore()}  |  Best Level: ${getHighLevel()}`, 400, 165);
+  // Main title — two-line, big
+  ctx.font = 'bold 44px Georgia,serif';
+  // Shadow layer
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillText('How I Met', 402, 70);
+  ctx.fillText('Your Mother', 402, 108);
+  // Blue gradient fill
+  const titleGrad = ctx.createLinearGradient(200, 30, 600, 110);
+  titleGrad.addColorStop(0, '#64B5F6');
+  titleGrad.addColorStop(0.45, '#FFFFFF');
+  titleGrad.addColorStop(1, '#FDD835');
+  ctx.fillStyle = titleGrad;
+  ctx.fillText('How I Met', 400, 68);
+  ctx.fillText('Your Mother', 400, 106);
 
-  // Ted character card
-  ctx.fillStyle = 'rgba(21,101,192,0.25)';
-  ctx.strokeStyle = '#ffd700';
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.roundRect(312, 190, 176, 95, 14); ctx.fill(); ctx.stroke();
-  ctx.save(); ctx.scale(0.65, 0.65); ctx.translate(430, 285);
+  // ── Subtitle tagline ──
+  ctx.fillStyle = '#90CAF9';
+  ctx.font = 'italic 13px Georgia,serif';
+  ctx.fillText('The Endless Runner', 400, 126);
+
+  // ── High score bar ──
+  ctx.fillStyle = 'rgba(255,215,0,0.12)';
+  ctx.beginPath(); ctx.roundRect(250, 133, 300, 24, 8); ctx.fill();
+  ctx.fillStyle = '#FFD700';
+  ctx.font = 'bold 12px monospace';
+  ctx.fillText(`★  High Score: ${getHighScore()}   |   Best Level: ${getHighLevel()}  ★`, 400, 149);
+
+  // ── Ted character + card ──
+  // Card glow
+  ctx.shadowColor = '#FDD835'; ctx.shadowBlur = 18;
+  ctx.fillStyle = 'rgba(13,32,64,0.82)';
+  ctx.strokeStyle = '#FDD835';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.roundRect(290, 162, 220, 108, 16); ctx.fill(); ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Ted drawn inside card, left side
+  ctx.save(); ctx.scale(0.72, 0.72); ctx.translate(425, 222);
   drawCartoonChar(0, 0, true, false);
   ctx.restore();
-  ctx.fillStyle = '#ffd700'; ctx.font = 'bold 15px monospace'; ctx.textAlign = 'center';
-  ctx.fillText('Play as Ted', 400, 269);
-  ctx.fillStyle = '#aaaaaa'; ctx.font = '11px monospace';
-  ctx.fillText('Collect 🎺 or ☂ — who will he meet?', 400, 286);
 
-  // Instructions
+  // Card text right side
+  ctx.fillStyle = '#FDD835';
+  ctx.font = 'bold 15px Georgia,serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Play as Ted', 400, 192);
+
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 16px monospace';
-  ctx.fillText('Press SPACE to Start', 400, 318);
+  ctx.font = '11px monospace';
+  ctx.fillText('Collect to choose your ending:', 400, 212);
+
+  // Horn row
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#64B5F6';
+  ctx.font = 'bold 11px monospace';
+  ctx.fillText('🎺  Horns  →  Robin', 306, 232);
+  // Umbrella row
+  ctx.fillStyle = '#FDD835';
+  ctx.fillText('☂  Umbrellas  →  Tracy', 306, 250);
+
+  // ── Start button ──
+  const pulse = 0.85 + 0.15 * Math.sin(frameCount * 0.08);
+  const btnGrad = ctx.createLinearGradient(310, 278, 490, 308);
+  btnGrad.addColorStop(0, `rgba(21,101,192,${0.9*pulse})`);
+  btnGrad.addColorStop(1, `rgba(30,136,229,${0.9*pulse})`);
+  ctx.fillStyle = btnGrad;
+  ctx.strokeStyle = `rgba(255,255,255,${0.7*pulse})`;
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(310, 278, 180, 36, 18); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 16px Georgia,serif';
+  ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 4;
+  ctx.fillText('▶  Press SPACE', 400, 301);
+  ctx.shadowBlur = 0;
+
+  // ── Controls strip ──
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ctx.fillRect(0, 325, 800, 75);
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0,325); ctx.lineTo(800,325); ctx.stroke();
+
   ctx.fillStyle = '#aaaaaa';
   ctx.font = '12px monospace';
-  ctx.fillText('SPACE = Jump  |  SPACE×2 = Super Jump  |  ↓ = Duck', 400, 343);
-  ctx.fillText('🎺 Blue Horns → Robin  |  ☂ Umbrellas → Tracy', 400, 363);
-  ctx.fillText('Defeat the bosses to reach the ending!', 400, 381);
+  ctx.fillText('SPACE = Jump   |   SPACE×2 = Super Jump   |   ↓ = Duck   |   F / → = Sword Attack', 400, 345);
+
+  ctx.fillStyle = '#64B5F6';
+  ctx.font = 'bold 12px monospace';
+  ctx.fillText('🎺 Collect Blue Horns to meet Robin', 400, 365);
+  ctx.fillStyle = '#FDD835';
+  ctx.fillText('☂ Collect Yellow Umbrellas to meet Tracy', 400, 385);
 }
 
 function drawGameOver() {
