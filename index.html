@@ -1729,7 +1729,7 @@ function drawBossIntro() {
   ctx.fillStyle = '#e53935';
   ctx.font = 'bold 30px monospace';
   ctx.textAlign = 'center';
-  const bossNames = { 1: 'BOSS: The Goat!', 2: 'BOSS: Slutty Pumpkin!', 3: "BOSS: Marshall's Twin!" };
+  const bossNames = { 1: 'BOSS: The Goat!', 2: 'BOSS: Slutty Pumpkin!', 3: 'BOSS: Barney Stinson!' };
   ctx.fillText(bossNames[currentLevel] || 'BOSS!', 200, 260);
   ctx.fillStyle = 'white';
   ctx.font = '16px monospace';
@@ -1989,7 +1989,7 @@ function update(dt) {
 
     // Check level transitions
     const lvl = LEVELS[currentLevel];
-    if (lvl && score > lvl.scoreLimit) {
+    if (lvl && score > lvl.scoreLimit && !bossPhase) {
       triggerBoss();
     }
 
